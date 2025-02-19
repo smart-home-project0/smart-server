@@ -1,0 +1,31 @@
+{
+  "name": "smart-server",
+  "description": "the server that use for integration with client and 3 parties",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "eslint": "eslint --max-warnings 0 lib test server.js && echo 'eslint passed :)' || echo 'eslint failed :('",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smart-home-project0/smart-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smart-home-project0/smart-server/issues"
+  },
+  "homepage": "https://github.com/smart-home-project0/smart-server#readme",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.9",
+    "path": "^0.12.7"
+  }
+}
