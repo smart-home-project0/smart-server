@@ -2,6 +2,7 @@
 
 //*************** Require Internal Modules ****************//
 const router = require('./lib/router');
+const errorHandler = require('./lib/errorHandler');
 
 //*************** Application initialization **************//
 // require("dotenv").config();
@@ -24,6 +25,7 @@ app.use(morgan("dev")); // Log requests
 
 // Use Routes
 app.use("", router); // can set the initial path
+app.use(errorHandler); // all errors go through errorHandler
 
 
 //*************** Application starting point ****************//
