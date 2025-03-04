@@ -1,24 +1,24 @@
 //*************** Constants ****************//
-const POST_JWT = "/postJWT";
-const GET_USERS = "/getUsers";
-const HELLO_WORLD = "/helloworld";
-const THROW_ERROR = "/throwError";
+const POST_JWT: string = "/postJWT";
+const GET_USERS: string = "/getUsers";
+const HELLO_WORLD: string = "/helloworld";
+const THROW_ERROR: string = "/throwError";
 
 // *************** Require External Modules ****************//
-const express = require('express');
+import express, { Request, Response, NextFunction } from 'express';
 
 // *************** Require Internal Modules ****************//
-const index = require('./index.js'); // the name of logic file
-
+import * as index from './index';
+    
 // const cache = require('./cache'); // caching
-const Ajv = require('ajv');
+import Ajv from 'ajv';
 
 //*************** Global vars ****************//
-const router = new express.Router();
+const router: express.Router = express.Router();
 
 //*************** Internal Functions ****************//
 
-function throwError() {
+function throwError(): void {
     throw Error("intentionally throwing error to test default error handler");
 }
 
@@ -29,11 +29,11 @@ function throwError() {
 // }); 
 
 router.route(HELLO_WORLD)
-    .get(async function helloWorld(req, res, next) {
+    .get(async function helloWorld(req: Request, res: Response, next: NextFunction) {
         try {
             req.metricsId = "helloWorld";
-            const name = req.query.user || "";
-            console.log("I am innnnnn!!!")
+            const name: string = String(req.query.user || "");
+            console.log("I am innnnnn!!!");
             res.json({ message: 'hello IH world! ' + name });
         }
         catch (err) {
@@ -52,4 +52,4 @@ router.route(GET_USERS)
 
 //*************** Export ****************//
 
-module.exports = router;
+export default router;
