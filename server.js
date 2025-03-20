@@ -1,37 +1,40 @@
-"use strict";
+// *************** Require Internal Modules ****************//
+import router from './src/lib/router.js';  // ייבוא הנתיבים שאתה כבר ייבאת
+import errorHandler from './src/lib/errorHandler.js';  // ייבוא למטפל בשגיאות
+import config from 'config';
+import { connectToMongo } from './src/lib/storage/mongo.js';  // חיבור למונגו
 
-//*************** Require Internal Modules ****************//
-const router = require('./lib/router');
-const { connectToMongo } = require('./lib/storage/mongo');
+// *************** Application initialization **************//
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
 
-//*************** Application initialization **************//
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const bodyParser = require('body-parser');
-const path = require('path');
 const app = express();
+const port = config.has('port') ? config.get('port') : 3000;
 
-//*************** Middleware **************//
-app.use(express.json()); // Parse JSON request bodies
-app.use(cors()); // Enable CORS
-app.use(morgan("dev")); // Log requests
+// *********** Middleware ************  
+app.use(express.json());  // Parse JSON request bodies
+app.use(cors());  // Enable CORS
+app.use(morgan("dev"));  // Log requests
 
-// Use Routes
-app.use("", router); // can set the initial path
+// Use Routes - כאן אתה מחבר את כל הנתיבים שלך
+app.use("", router);  // כל הנתיבים מה-router.js שלך יפנו לשורש האתר
+app.use(errorHandler);  // כל השגיאות עוברות דרך המטפל בשגיאות שלך
 
-//*************** Application starting point ****************//
-const PORT = process.env.PORT || 5001;
-const logger = console; // Replace with a proper logger if needed
+// *************** Application starting point ****************//
+async function startServer() {
+    try {
+        // ✅ 1. קודם כל, להתחבר ל-MongoDB
+        await connectToMongo(console);
 
-connectToMongo(logger)
-    .then(() => {
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    })
-    .catch((error) => {
-        console.error("Failed to connect to MongoDB", error);
-        process.exit(1); // Exit if MongoDB connection fails
-    });
+        // ✅ 2. רק אם החיבור הצליח, להפעיל את השרת
+        app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+    } catch (error) {
+        console.error("❌ Failed to start the server due to MongoDB connection error:", error);
+        process.exit(1); // סיום התהליך אם יש שגיאה
+    }
+}
 
-module.exports = app;
+startServer();  // הפעלת השרת עם חיבור למונגו
 
+export default app;

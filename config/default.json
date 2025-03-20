@@ -1,14 +1,14 @@
+
 {
+  "storage": "mongo",
   "mongo": {
-    "storage": "mongo",
-    "cluster_url": "smarthomecluster.hna5s.mongodb.net",
-    "sharded": true,
+    "cluster_url": "localhost:27017",
+    "sharded": false,
     "replica_set": "",
-    "mongoDBName": "smartHomecluster",
-    "uri_prefix": "mongodb+srv",
+    "mongoDBName": "smartHome",
+    "uri_prefix": "mongodb",
     "collection": "",
-    "password": "sk6161551",
-    "username": "kedshani",
+    "password": "",
     "connectTimeoutMS": 60000
   }
 }
