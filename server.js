@@ -1,40 +1,46 @@
 // *************** Require Internal Modules ****************//
-import router from './src/lib/router.js';  // ייבוא הנתיבים שאתה כבר ייבאת
-import errorHandler from './src/lib/errorHandler.js';  // ייבוא למטפל בשגיאות
+import router from './src/lib/router.js';  // Importing routes
+import errorHandler from './src/lib/errorHandler.js';  // Importing error handler
 import config from 'config';
-import { connectToMongo } from './src/lib/storage/mongo.js';  // חיבור למונגו
+import { connectToMongo } from './src/lib/storage/mongo.js';  // MongoDB connection
 
-// *************** Application initialization **************//
+// *************** Application Initialization **************//
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
 const app = express();
 const port = config.has('port') ? config.get('port') : 3000;
+let mongoConnected = false; // Flag to track MongoDB connection status
 
 // *********** Middleware ************  
 app.use(express.json());  // Parse JSON request bodies
 app.use(cors());  // Enable CORS
 app.use(morgan("dev"));  // Log requests
 
-// Use Routes - כאן אתה מחבר את כל הנתיבים שלך
-app.use("", router);  // כל הנתיבים מה-router.js שלך יפנו לשורש האתר
-app.use(errorHandler);  // כל השגיאות עוברות דרך המטפל בשגיאות שלך
-
-// *************** Application starting point ****************//
-async function startServer() {
-    try {
-        // ✅ 1. קודם כל, להתחבר ל-MongoDB
-        await connectToMongo(console);
-
-        // ✅ 2. רק אם החיבור הצליח, להפעיל את השרת
-        app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
-    } catch (error) {
-        console.error("❌ Failed to start the server due to MongoDB connection error:", error);
-        process.exit(1); // סיום התהליך אם יש שגיאה
+// Middleware to check MongoDB connection before accessing database routes
+app.use((req, res, next) => {
+    if (!mongoConnected && req.path.startsWith("/mongo")) {
+        return res.status(503).json({ error: "MongoDB connection is not available. Please try again later." });
     }
-}
+    next();
+});
 
-startServer();  // הפעלת השרת עם חיבור למונגו
+// Use Routes - Connecting all defined routes
+app.use("", router);  // Routes from router.js will be available at the root
+app.use(errorHandler);  // Error handling middleware
+
+// *************** Start Server ****************//
+app.listen(port, async () => {
+    console.log(`🚀 Server running on port ${port}`);
+
+    try {
+        await connectToMongo(console);
+        mongoConnected = true;
+        console.log("✅ Successfully connected to MongoDB");
+    } catch (error) {
+        console.error("❌ MongoDB connection failed:", error.message);
+    }
+});
 
 export default app;

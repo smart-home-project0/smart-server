@@ -42,27 +42,51 @@ export async function connectToMongo(logger) {
     try {
         logger && logger.info(`Connecting to MongoDB at ${url}`);
 
-        // סוגרים חיבור קודם אם קיים
         if (mongoConn) {
             await mongoConn.close();
             logger && logger.info("Previous MongoDB connection closed.");
         }
 
-        // יוצרים חיבור חדש
         mongoConn = await MongoClient.connect(url, options);
         dbHandle = mongoConn.db(config.mongo.mongoDBName);
 
         logger && logger.info("Connected to MongoDB successfully");
+
+        // ** This function is temporary, later we will separate MongoDB setup **
+        await createCollectionIfNotExists("defaultCollection");
+
     } catch (error) {
         logger && logger.error("MongoDB connection error", error);
         throw error;
     }
 }
 
-
 export function getDB() {
     if (!dbHandle) {
         throw new Error("Database not initialized. Call connectToMongo first.");
     }
     return dbHandle;
+}
+
+export async function getUsersFromDB() {
+    if (!dbHandle) {
+        throw new Error("Database not initialized. Call connectToMongo first.");
+    }
+    return dbHandle.collection("users").find().toArray();
+}
+
+/**
+ * Creates a new collection in the database if it does not exist.
+ * ** In the future, MongoDB setup will be separated **
+ */
+export async function createCollectionIfNotExists(collectionName) {
+    if (!dbHandle) {
+        throw new Error("Database not initialized. Call connectToMongo first.");
+    }
+
+    const collections = await dbHandle.listCollections({ name: collectionName }).toArray();
+    if (collections.length === 0) {
+        await dbHandle.createCollection(collectionName);
+        console.log(`Collection '${collectionName}' created successfully!`);
+    }
 }
