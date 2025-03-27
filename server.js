@@ -1,22 +1,22 @@
 // *************** Require Internal Modules ****************//
-import router from './src/lib/router.js';  // Importing routes
-import errorHandler from './src/lib/errorHandler.js';  // Importing error handler
-import config from 'config';
-import { connectToMongo } from './src/lib/storage/mongo.js';  // MongoDB connection
-
-// *************** Application Initialization **************//
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import config from "config";
+import { connectToMongo } from "./src/lib/storage/mongo.js";  
+import router from "./src/lib/router.js";  // General routes
+import userRoutes from "./src/routers/user.js"; // User routes
+import errorHandler from "./src/lib/errorHandler.js";  
 
+// *************** Application Initialization **************//
 const app = express();
-const port = config.has('port') ? config.get('port') : 3000;
-let mongoConnected = false; // Flag to track MongoDB connection status
+const port = config.has("port") ? config.get("port") : 3000;
+let mongoConnected = false;  
 
 // *********** Middleware ************  
-app.use(express.json());  // Parse JSON request bodies
-app.use(cors());  // Enable CORS
-app.use(morgan("dev"));  // Log requests
+app.use(express.json());  
+app.use(cors());  
+app.use(morgan("dev"));  
 
 // Middleware to check MongoDB connection before accessing database routes
 app.use((req, res, next) => {
@@ -26,9 +26,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// Use Routes - Connecting all defined routes
-app.use("", router);  // Routes from router.js will be available at the root
-app.use(errorHandler);  // Error handling middleware
+// Use Routes
+app.use("/", router);  // General routes
+app.use("/api/users", userRoutes);  // Routes for user-related actions
+app.use(errorHandler);  
 
 // *************** Start Server ****************//
 app.listen(port, async () => {
