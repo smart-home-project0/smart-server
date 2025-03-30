@@ -3,7 +3,7 @@ const HELLO_WORLD = "/helloworld";
 const THROW_ERROR = "/throwError";
 const SIGN_UP = "/signup";
 const LOGIN = "/login";
-const UPDATE_PASSWORD = "/update-password";
+const CHANGE_PASSWORD = "/change-password";
 
 // *************** Import External Modules ****************//
 import express from 'express';
@@ -43,7 +43,7 @@ router.route(SIGN_UP)
 router.route(LOGIN)
     .post(user.getUserByuserNamePassword_Login);
 
-router.route(UPDATE_PASSWORD)
+router.route(CHANGE_PASSWORD)
     .put(user.changePassword);
 
 // *************** Export ****************//

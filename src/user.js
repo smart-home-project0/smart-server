@@ -78,8 +78,8 @@ async function isPasswordValid(inputPassword, hashedPassword) {
     }
 }
 
-// User Login
- async function getUserByuserNamePassword_Login(req, res, next) {
+ // User Login
+async function getUserByuserNamePassword_Login(req, res, next) {
     try {
         const { isValid, errors } = validateSchema("user_loginSchema", req.body);
         if (!isValid) {
@@ -88,12 +88,16 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(401).json({ message: "Invalid email or password" });
+            return res.status(401).json({ message: "Email and password are required" });
         }
 
         const user = await findUserByEmail(email);
-        if (!user || !(await isPasswordValid(password, user.password))) {
-            return res.status(401).json({ message: "Invalid email or password" });
+        if (!user) {
+            return res.status(401).json({ message: "Email not found" }); 
+        }
+
+        if (!(await isPasswordValid(password, user.password))) {
+            return res.status(401).json({ message: "Incorrect password" }); 
         }
 
         const response = {
@@ -106,6 +110,7 @@ async function isPasswordValid(inputPassword, hashedPassword) {
         next(error);
     }
 }
+
 
 // Change Password
 async function changePassword(req, res, next) {
