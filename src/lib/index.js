@@ -1,4 +1,5 @@
 
+
 const getUsers = (req, res, next) => {
     try {
         res.json({ message: "Get all users" });
