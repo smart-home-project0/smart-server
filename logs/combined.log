@@ -1,3 +1,5 @@
 {"level":"error","message":"[ERROR] SECRET_KEY is not defined in environment variables"}
 {"level":"error","message":"[ERROR] generateToken is not a function"}
 {"level":"error","message":"[ERROR] generateToken is not a function"}
+{"level":"error","message":"[ERROR] user.toObject is not a function"}
+{"level":"error","message":"[ERROR] user.toObject is not a function"}
