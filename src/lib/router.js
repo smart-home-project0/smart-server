@@ -1,22 +1,26 @@
-//*************** Constants ****************//
-const GET_USERS = "/getUsers";
+// *************** Constants ****************//
 const HELLO_WORLD = "/helloworld";
 const THROW_ERROR = "/throwError";
+const SIGN_UP = "/signup";
+const LOGIN = "/login";
+const CHANGE_PASSWORD = "/change-password";
 
 // *************** Import External Modules ****************//
 import express from 'express';
 
 // *************** Import Internal Modules ****************//
-import * as index from './index.js';
+import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 
 const router = express.Router();
 
-//*************** Internal Functions ****************//
+// *************** Internal Functions ****************//
 function throwError() {
     throw Error("Intentionally throwing error to test default error handler");
 }
 
-//*************** Routes ****************//
+// *************** Routes ****************//
+
+// General route example: hello world
 router.route(HELLO_WORLD)
     .get(async function helloWorld(req, res, next) {
         try {
@@ -28,11 +32,19 @@ router.route(HELLO_WORLD)
         }
     });
 
+// Route to test error handling
 router.route(THROW_ERROR)
     .get(throwError);
 
-router.route(GET_USERS)
-    .get(index.getUsers); // שימוש בקובץ ובפונקציה מהייבוא
+// User routes: using the functions imported from user.js
+router.route(SIGN_UP)
+    .post(user.add_signUp);
 
-//*************** Export ****************//
+router.route(LOGIN)
+    .post(user.getUserByuserNamePassword_Login);
+
+router.route(CHANGE_PASSWORD)
+    .put(user.changePassword);
+
+// *************** Export ****************//
 export default router;
