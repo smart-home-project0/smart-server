@@ -52,5 +52,5 @@
     "eslint-plugin-react": "^7.37.4",
     "globals": "^16.0.0",
     "typescript": "^5.8.2"
-  }
+ }
 }
