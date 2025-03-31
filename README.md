@@ -1,16 +1,13 @@
 # smart-server
-the server that use for integration with client and 3 parties
+the server that use for integration with client and 3 parties.
+
 # Directory Structure
 
-│── package.json           # Manages project dependencies and scripts
-│── package-lock.json      # Locks dependencies for consistency
-│── jsconfig.json          # JavaScript configuration file
-│── .gitignore             # Specifies ignored files for version control
+│── README.md              # Project documentation
+|
 │── .vscode/               # VS Code configurations
 │   └── launch.json        # Debugging settings
-│── README.md              # Project documentation
-│── server.js              # Main entry point of the application
-│
+|
 ├── node_modules/          # Installed dependencies (auto-generated)
 │
 ├── logs/                  # Stores log files
@@ -19,21 +16,24 @@ the server that use for integration with client and 3 parties
 │
 ├── src/                   # Main source code
 │   ├── lib/               # Core logic and modules
+|   │   ├── utils/             # Utility functions
+│   |   │   └── logger.js      # Manages logging functionality
 │   │   ├── errorHandler.js  # Global error management
-│   │   ├── index.js        # Main logic file.
 │   │   ├── router.js       # Defines server routes
-│   │
-│   ├── utils/             # Utility functions
-│   │   └── logger.js      # Manages logging functionality
+|   |   |   ├── user.js     # All user-related functions
+│   │   ├── storage/
+│   │   |   ├── mongo.js   # Connecting to Mongo DB
+|   |   ├── schemas/       # Database models and schemas
 │
-├── config/                # Configuration files (e.g., environment variables, DB settings)
+├── config/                # Configuration files (e.g., environment variables, )
 │
-├── public/                # Static files (HTML, CSS, JS, images)
-│
-├── routes/                # API route definitions
-│
-├── controllers/           # Business logic for API requests
-│
-├── middlewares/           # Middleware functions (authentication, error handling)
-│
-└── models/                # Database models and schemas
+│── server.js              # Main entry point of the application-first connection
+|                            to DB and server port    
+|                                   
+│── package.json           # Manages project dependencies and scripts
+│── package-lock.json      # Locks dependencies for consistency
+│── jsconfig.json          # JavaScript configuration file
+│── .gitignore             # Specifies ignored files for version control
+
+
+
