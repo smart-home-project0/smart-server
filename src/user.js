@@ -79,7 +79,7 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 }
 
  // User Login
-async function getUserByuserNamePassword_Login(req, res, next) {
+ async function getUserByuserNamePassword_Login(req, res, next) {
     try {
         const { isValid, errors } = validateSchema("user_loginSchema", req.body);
         if (!isValid) {
@@ -93,16 +93,23 @@ async function getUserByuserNamePassword_Login(req, res, next) {
 
         const user = await findUserByEmail(email);
         if (!user) {
-            return res.status(401).json({ message: "Email not found" }); 
+            return res.status(401).json({ message: "Email not found" });
         }
 
         if (!(await isPasswordValid(password, user.password))) {
-            return res.status(401).json({ message: "Incorrect password" }); 
+            return res.status(401).json({ message: "Incorrect password" });
         }
 
         const response = {
             message: "Login successful",
             token: generateToken(user),
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                familyId: user.familyId,
+                // להוסיף עוד שדות שרלוונטיים
+            }
         };
 
         return res.json(response);
