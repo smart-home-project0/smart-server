@@ -6,6 +6,8 @@ import addFormats from "ajv-formats";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import verifyGoogleToken from "./middleware/googleAuth.js"; 
+
 
 // **** Load JSON Schemas using Ajv ****
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -84,7 +86,33 @@ async function isPasswordValid(inputPassword, hashedPassword) {
         next(error);
     }
 }
+// Google Sign-Up
+async function add_signUpWithGoogle(req, res, next) {
+    try {
+        const { name, email, googleId } = req.user; // מגיע מה-middleware
 
+        let user = await findUserByEmail(email);
+        if (!user) {
+            user = await createUser({
+                name,
+                email,
+                googleId,
+                provider: "google",
+                role: "user",
+            });
+        }
+
+        const token = generateToken(user);
+
+        return res.status(200).json({
+            message: "Google Sign-Up successful",
+            token,
+            user,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
  // User Login
  async function getUserByuserNamePassword_Login(req, res, next) {
     try {
@@ -124,7 +152,31 @@ async function isPasswordValid(inputPassword, hashedPassword) {
         next(error);
     }
 }
+// Google Sign-In
+async function getUserByGoogle_Login(req, res, next) {
+    try {
+        const { email, googleId } = req.user;
 
+        const user = await findUserByEmail(email);
+        if (!user) {
+            return res.status(404).json({ message: "User not found. Please sign up first." });
+        }
+
+        if (user.provider !== "google") {
+            return res.status(400).json({ message: "This email is registered with another method." });
+        }
+
+        const token = generateToken(user);
+
+        return res.status(200).json({
+            message: "Google Login successful",
+            token,
+            user,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
 
 // Change Password
 async function changePassword(req, res, next) {
@@ -155,4 +207,4 @@ async function changePassword(req, res, next) {
 }
 
 // Export all functions in one line
-export { add_signUp, getUserByuserNamePassword_Login, changePassword };
+export { add_signUp, getUserByuserNamePassword_Login, changePassword,add_signUpWithGoogle, getUserByGoogle_Login };
