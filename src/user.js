@@ -69,7 +69,14 @@ async function isPasswordValid(inputPassword, hashedPassword) {
         const response = {
             message: "User registered successfully",
             token: generateToken(newUser),
-            familyId: finalFamilyId,
+            user: {
+                _id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                familyId: newUser.familyId,
+                role: newUser.role,
+                // להוסיף עוד שדות שרלוונטיים אם יש
+            }
         };
 
         return res.status(201).json(response);

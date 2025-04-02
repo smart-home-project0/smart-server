@@ -3,13 +3,16 @@ import { MongoClient, ObjectId } from 'mongodb';
 
 let dbHandle, mongoConn;
 
+const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
+const FAMILIES_COLLECTION = config.mongo.familiesCollectionName || "families";
+
 function getMongoConnectionString() {
     let connectionString = "";
 
     if (config.mongo.uri_prefix) {
         connectionString += `${config.mongo.uri_prefix}://`;
     }
-    if (config.mongo.name && config.mongo.password) {
+    if (config.mongo.username && config.mongo.password) {
         const encodedPassword = encodeURIComponent(config.mongo.password);
         connectionString += `${config.mongo.username}:${encodedPassword}@`;
     }
@@ -60,50 +63,39 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
     }
 }
 
-function getDB() {
-    if (!dbHandle) {
-        throw new Error("Database not initialized. Call connectToMongo first.");
-    }
-    return dbHandle;
-}
-
 async function createCollectionIfNotExists(collectionName) {
-    const db = getDB();
-    const collections = await db.listCollections({ name: collectionName }).toArray();
+    const collections = await dbHandle.listCollections({ name: collectionName }).toArray();
     if (collections.length === 0) {
-        await db.createCollection(collectionName);
+        await dbHandle.createCollection(collectionName);
         console.log(`Collection '${collectionName}' created successfully!`);
     }
 }
 
 async function findUserByEmail(email) {
-    const db = getDB();
-    return await db.collection("users").findOne({ email });
+    return await dbHandle.collection(USERS_COLLECTION).findOne({ email });
 }
 
 async function createFamily(name) {
-    const db = getDB();
-    const familyCollection = db.collection("families");
-    const newFamily = { name: `${name} Family` };
-    const result = await familyCollection.insertOne(newFamily);
+    const newFamily = { name: `${name} Family`, devices: [] };
+    const result = await dbHandle.collection(FAMILIES_COLLECTION).insertOne(newFamily);
     return result.insertedId;
 }
 
 async function createUser(userData) {
-    const db = getDB();
-    const result = await db.collection("users").insertOne(userData);
-    return await db.collection("users").findOne({ _id: result.insertedId });
+    const result = await dbHandle.collection(USERS_COLLECTION).insertOne(userData);
+    return result.insertedId; 
 }
 
 async function findUserById(userId) {
-    const db = getDB();
-    return await db.collection("users").findOne({ _id: new ObjectId(userId) });
+    return await dbHandle.collection(USERS_COLLECTION).findOne({ _id: new ObjectId(userId) });
 }
 
 async function updateUser(userId, updateData) {
-    const db = getDB();
-    await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: updateData });
-    return await findUserById(userId);
+    await dbHandle.collection(USERS_COLLECTION).updateOne(
+        { _id: new ObjectId(userId) },
+        { $set: updateData }
+    );
+    return updateData; 
 }
 
-export { connectToMongo, getDB, createCollectionIfNotExists, findUserByEmail, createFamily, createUser, findUserById, updateUser };
+export { connectToMongo, createCollectionIfNotExists, findUserByEmail, createFamily, createUser, findUserById, updateUser };
