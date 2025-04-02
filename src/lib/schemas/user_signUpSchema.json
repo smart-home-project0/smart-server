@@ -5,7 +5,9 @@
       "name": { "type": "string", "minLength": 3, "maxLength": 30 },
       "email": { "type": "string", "format": "email" },
       "password": { "type": "string", "minLength": 6 },
-      "familyId": { "type": "string", "pattern": "^[0-9a-fA-F]{24}$" }
+      "familyId": { "type": "string", "pattern": "^[0-9a-fA-F]{24}$" },
+      "googleId": { "type": "string" },
+      "provider": { "type": "string", "enum": ["google", "local"] }
     },
     "required": ["name", "email", "password"],
     "additionalProperties": false

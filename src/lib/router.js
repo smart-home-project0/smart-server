@@ -4,10 +4,12 @@ const THROW_ERROR = "/throwError";
 const SIGN_UP = "/signup";
 const LOGIN = "/login";
 const CHANGE_PASSWORD = "/change-password";
+const GOOGLE_SIGNUP = "/signup/google";
+const GOOGLE_LOGIN = "/login/google";
 
 // *************** Import External Modules ****************//
 import express from 'express';
-
+import verifyGoogleToken from "../middleware/googleAuth.js";
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 
@@ -45,6 +47,9 @@ router.route(LOGIN)
 
 router.route(CHANGE_PASSWORD)
     .put(user.changePassword);
-
+router.route(GOOGLE_SIGNUP)
+    .post(verifyGoogleToken, user.add_signUpWithGoogle);
+router.route(GOOGLE_LOGIN)
+    .post(verifyGoogleToken, user.getUserByGoogle_Login);
 // *************** Export ****************//
 export default router;
