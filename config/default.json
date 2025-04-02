@@ -1,4 +1,3 @@
-
 {
   "storage": "mongo",
   "mongo": {
@@ -9,6 +8,8 @@
     "uri_prefix": "mongodb",
     "collection": "",
     "password": "",
-    "connectTimeoutMS": 60000
+    "connectTimeoutMS": 60000,
+    "usersCollectionName": "users",
+    "familiesCollectionName": "families"
   }
 }
