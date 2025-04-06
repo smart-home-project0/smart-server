@@ -87,32 +87,36 @@ async function isPasswordValid(inputPassword, hashedPassword) {
     }
 }
 // Google Sign-Up
-async function add_signUpWithGoogle(req, res, next) {
+async function add_signUpWithGoogle(req, res) {
+    
     try {
-        const { name, email, googleId } = req.user; // מגיע מה-middleware
-
-        let user = await findUserByEmail(email);
-        if (!user) {
-            user = await createUser({
-                name,
-                email,
-                googleId,
-                provider: "google",
-                role: "user",
-            });
-        }
-
-        const token = generateToken(user);
-
-        return res.status(200).json({
-            message: "Google Sign-Up successful",
-            token,
-            user,
-        });
+        console.log('Request headers:', req.headers); // הוסף את השורה הזו
+        console.log('Google token payload:', req.user); // השתמש ב-req.user
+  
+      if (!req.user || !req.user.email || !req.user.name) { // השתמש ב-req.user
+        return res.status(400).json({ success: false, message: "Invalid Google token" });
+      }
+  
+      const existingUser = await User.findOne({ email: req.user.email }); // השתמש ב-req.user
+  
+      if (existingUser) {
+        return res.status(409).json({ success: false, message: "Email already exists" });
+      }
+  
+      const newUser = new User({
+        name: req.user.name, // השתמש ב-req.user
+        email: req.user.email, // השתמש ב-req.user
+        password: "", // No password for Google sign-in
+      });
+  
+      await newUser.save();
+      return res.status(201).json({ success: true, user: newUser._id });
     } catch (error) {
-        next(error);
+      console.error("Google signup error:", error);
+      return res.status(500).json({ success: false, message: "Google signup failed", error: error.message });
     }
-}
+  }
+      
  // User Login
  async function getUserByuserNamePassword_Login(req, res, next) {
     try {
