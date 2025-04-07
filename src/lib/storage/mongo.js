@@ -5,6 +5,8 @@ let dbHandle, mongoConn;
 
 const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
 const FAMILIES_COLLECTION = config.mongo.familiesCollectionName || "families";
+const DEVICES_COLLECTION = config.mongo.familiesCollectionName || "devices";
+
 
 function getMongoConnectionString() {
   let connectionString = "";
@@ -13,7 +15,7 @@ function getMongoConnectionString() {
   if (config.mongo.uri_prefix) {
     connectionString += `${config.mongo.uri_prefix}://`;
   }
-  if (config.mongo.name && config.mongo.password) {
+  if (config.mongo.username && config.mongo.password) {
     const encodedPassword = encodeURIComponent(config.mongo.password);
     connectionString += `${config.mongo.username}:${encodedPassword}@`;
   }
@@ -71,38 +73,45 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
 
 
 async function createCollectionIfNotExists(collectionName) {
-    const collections = await dbHandle.listCollections({ name: collectionName }).toArray();
-    if (collections.length === 0) {
-        await dbHandle.createCollection(collectionName);
-        console.log(`Collection '${collectionName}' created successfully!`);
-    }
+  const collections = await dbHandle
+    .listCollections({ name: collectionName })
+    .toArray();
+  if (collections.length === 0) {
+    await dbHandle.createCollection(collectionName);
+    console.log(`Collection '${collectionName}' created successfully!`);
+  }
 }
 
 async function findUserByEmail(email) {
-    return await dbHandle.collection(USERS_COLLECTION).findOne({ email });
+  return await dbHandle.collection(USERS_COLLECTION).findOne({ email });
 }
 
 async function createFamily(name) {
-    const newFamily = { name: `${name} Family`, devices: [] };
-    const result = await dbHandle.collection(FAMILIES_COLLECTION).insertOne(newFamily);
-    return result.insertedId;
+  const newFamily = { name: `${name} Family`, devices: [] };
+  const result = await dbHandle
+    .collection(FAMILIES_COLLECTION)
+    .insertOne(newFamily);
+  return result.insertedId;
 }
 
 async function createUser(userData) {
-    const result = await dbHandle.collection(USERS_COLLECTION).insertOne(userData);
-    return result.insertedId; 
+  const result = await dbHandle
+    .collection(USERS_COLLECTION)
+    .insertOne(userData);
+  return result.insertedId;
 }
 
 async function findUserById(userId) {
-    return await dbHandle.collection(USERS_COLLECTION).findOne({ _id: new ObjectId(userId) });
+  return await dbHandle
+    .collection(USERS_COLLECTION)
+    .findOne({ _id: new ObjectId(userId) });
 }
 
 async function updateUser(userId, updateData) {
-    await dbHandle.collection(USERS_COLLECTION).updateOne(
-        { _id: new ObjectId(userId) },
-        { $set: updateData }
-    );
-    return updateData; 
+  await dbHandle
+    .collection(USERS_COLLECTION)
+    .updateOne({ _id: new ObjectId(userId) }, { $set: updateData });
+  return updateData;
 }
 
 async function findDevicesByfamily_id(family_id) {
@@ -113,11 +122,33 @@ async function findDevicesByfamily_id(family_id) {
   if (!family) return null;
 
   const devices = await dbHandle
-    .collection("devices")
+
+    .collection(DEVICES_COLLECTION)
     .find({ _id: { $in: family.devices.map((id) => new ObjectId(id)) } })
     .toArray();
 
   return devices;
 }
+async function findFamilyNameByfamily_id(family_id) {
+  const family = await dbHandle
+    .collection(FAMILIES_COLLECTION)
+    .findOne({ _id: new ObjectId(family_id) });
 
-export { connectToMongo, createCollectionIfNotExists, findUserByEmail, createFamily, createUser, findUserById, updateUser ,findDevicesByfamily_id};
+  if (!family) return null;
+  const familyName = family.name;
+  return familyName;
+
+}
+
+
+export {
+  connectToMongo,
+  createCollectionIfNotExists,
+  findUserByEmail,
+  createFamily,
+  createUser,
+  findUserById,
+  updateUser,
+  findDevicesByfamily_id,
+  findFamilyNameByfamily_id
+};

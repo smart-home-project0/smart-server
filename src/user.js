@@ -124,6 +124,13 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 
     return res.status(201).json(response);
   } 
+
+  /*לא יודעת מה זה ה-3 שורות של הקוד הבא הפריע לי ונתן שגיאה... */
+  // .catch (error) {
+  //   next(error);
+  // }
+
+
  // User Login
 async function getUserByuserNamePassword_Login(req, res, next) {
     try {
