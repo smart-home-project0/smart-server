@@ -133,6 +133,17 @@ async function findDevicesByfamily_id(family_id) {
   return devices;
 }
 
+async function findFamilyNameByfamily_id(family_id) {
+  const db = getDB();
+  const family = await db
+    .collection("families")
+    .findOne({ _id: new ObjectId(family_id) });
+
+  if (!family) return null;
+  const familyName = family.name;
+  return familyName;
+  
+}
 export {
   connectToMongo,
   getDB,
@@ -143,4 +154,5 @@ export {
   findUserById,
   updateUser,
   findDevicesByfamily_id,
+  findFamilyNameByfamily_id,
 };
