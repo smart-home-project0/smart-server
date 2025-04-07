@@ -46,11 +46,51 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 }
 
 // User Signup
-async function add_signUp(req, res, next) {
-  try {
-    const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
-    if (!isValid) {
-      return res.status(400).json({ errors });
+
+ async function add_signUp(req, res, next) {
+    try {
+        const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
+        if (!isValid) {
+            return res.status(400).json({ errors });
+        }
+
+        const { name, email, password, familyId } = req.body;
+        const existingUser = await findUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ message: "User with this email already exists" });
+        }
+
+        let finalFamilyId = familyId;
+        if (!finalFamilyId) {
+            const lastName = name.split(" ")[1] || name;
+            finalFamilyId = await createFamily(lastName);
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await createUser({
+            name,
+            email,
+            password: hashedPassword,
+            familyId: finalFamilyId,
+            role: "admin",
+        });
+
+        const response = {
+            message: "User registered successfully",
+            token: generateToken(newUser),
+            user: {
+                _id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                familyId: newUser.familyId,
+                role: newUser.role,
+                // להוסיף עוד שדות שרלוונטיים אם יש
+            }
+        };
+
+        return res.status(201).json(response);
+    } catch (error) {
+        next(error);
     }
 
     const { name, email, password, family_id } = req.body;
@@ -83,11 +123,7 @@ async function add_signUp(req, res, next) {
     };
 
     return res.status(201).json(response);
-  } catch (error) {
-    next(error);
-  }
-}
-
+  } 
  // User Login
 async function getUserByuserNamePassword_Login(req, res, next) {
     try {
