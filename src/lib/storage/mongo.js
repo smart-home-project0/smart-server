@@ -5,12 +5,10 @@ let dbHandle, mongoConn;
 
 const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
 const FAMILIES_COLLECTION = config.mongo.familiesCollectionName || "families";
-const DEVICES_COLLECTION = config.mongo.familiesCollectionName || "devices";
-
+const DEVICES_COLLECTION = config.mongo.devicesCollectionName || "devices";
 
 function getMongoConnectionString() {
   let connectionString = "";
-
 
   if (config.mongo.uri_prefix) {
     connectionString += `${config.mongo.uri_prefix}://`;
@@ -71,17 +69,6 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
   }
 }
 
-
-async function createCollectionIfNotExists(collectionName) {
-  const collections = await dbHandle
-    .listCollections({ name: collectionName })
-    .toArray();
-  if (collections.length === 0) {
-    await dbHandle.createCollection(collectionName);
-    console.log(`Collection '${collectionName}' created successfully!`);
-  }
-}
-
 async function findUserByEmail(email) {
   return await dbHandle.collection(USERS_COLLECTION).findOne({ email });
 }
@@ -118,37 +105,35 @@ async function findDevicesByfamily_id(family_id) {
   const family = await dbHandle
     .collection(FAMILIES_COLLECTION)
     .findOne({ _id: new ObjectId(family_id) });
-
   if (!family) return null;
-
+  //if (!family.devices || family.devices.length === 0) return [];
+  // If the family has devices, fetch them from the devices collection
+  const familyDevices = family.devices.map((id) => new ObjectId(id));
   const devices = await dbHandle
-
     .collection(DEVICES_COLLECTION)
-    .find({ _id: { $in: family.devices.map((id) => new ObjectId(id)) } })
+    .find({ _id: { $in: familyDevices } })
     .toArray();
-
   return devices;
 }
-async function findFamilyNameByfamily_id(family_id) {
-  const family = await dbHandle
-    .collection(FAMILIES_COLLECTION)
-    .findOne({ _id: new ObjectId(family_id) });
 
-  if (!family) return null;
-  const familyName = family.name;
-  return familyName;
+//פונקציה לשליפת שם משפחה לפי family_id
+//לשים לב שזה לא מיוצא
+// async function findFamilyNameByfamily_id(family_id) {
+//   const family = await dbHandle
+//     .collection(FAMILIES_COLLECTION)
+//     .findOne({ _id: new ObjectId(family_id) });
 
-}
-
+//   if (!family) return null;
+//   const familyName = family.name;
+//   return familyName;
+// }
 
 export {
   connectToMongo,
-  createCollectionIfNotExists,
   findUserByEmail,
   createFamily,
   createUser,
   findUserById,
   updateUser,
   findDevicesByfamily_id,
-  findFamilyNameByfamily_id
 };

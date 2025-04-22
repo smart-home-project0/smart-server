@@ -1,3 +1,9 @@
 {"level":"error","message":"[ERROR] SECRET_KEY is not defined in environment variables"}
 {"level":"error","message":"[ERROR] generateToken is not a function"}
 {"level":"error","message":"[ERROR] generateToken is not a function"}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}

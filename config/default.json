@@ -11,6 +11,6 @@
     "connectTimeoutMS": 60000,
     "usersCollectionName": "users",
     "familiesCollectionName": "families",
-    "devicesCollectionName": "families"
+    "devicesCollectionName": "devices"
   }
 }

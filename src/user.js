@@ -47,53 +47,14 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 
 // User Signup
 
- async function add_signUp(req, res, next) {
-    try {
-        const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
-        if (!isValid) {
-            return res.status(400).json({ errors });
-        }
-
-        const { name, email, password, familyId } = req.body;
-        const existingUser = await findUserByEmail(email);
-        if (existingUser) {
-            return res.status(400).json({ message: "User with this email already exists" });
-        }
-
-        let finalFamilyId = familyId;
-        if (!finalFamilyId) {
-            const lastName = name.split(" ")[1] || name;
-            finalFamilyId = await createFamily(lastName);
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await createUser({
-            name,
-            email,
-            password: hashedPassword,
-            familyId: finalFamilyId,
-            role: "admin",
-        });
-
-        const response = {
-            message: "User registered successfully",
-            token: generateToken(newUser),
-            user: {
-                _id: newUser._id,
-                name: newUser.name,
-                email: newUser.email,
-                familyId: newUser.familyId,
-                role: newUser.role,
-                // להוסיף עוד שדות שרלוונטיים אם יש
-            }
-        };
-
-        return res.status(201).json(response);
-    } catch (error) {
-        next(error);
+async function add_signUp(req, res, next) {
+  try {
+    const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
+    if (!isValid) {
+      return res.status(400).json({ errors });
     }
 
-    const { name, email, password, family_id } = req.body;
+    const { name, email, password, familyId } = req.body;
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res
@@ -101,10 +62,10 @@ async function isPasswordValid(inputPassword, hashedPassword) {
         .json({ message: "User with this email already exists" });
     }
 
-    let finalfamily_id = family_id;
-    if (!finalfamily_id) {
+    let finalFamilyId = familyId;
+    if (!finalFamilyId) {
       const lastName = name.split(" ")[1] || name;
-      finalfamily_id = await createFamily(lastName);
+      finalFamilyId = await createFamily(lastName);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -112,32 +73,36 @@ async function isPasswordValid(inputPassword, hashedPassword) {
       name,
       email,
       password: hashedPassword,
-      family_id: finalfamily_id,
+      familyId: finalFamilyId,
       role: "admin",
     });
 
     const response = {
       message: "User registered successfully",
       token: generateToken(newUser),
-      family_id: finalfamily_id,
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        familyId: newUser.familyId,
+        role: newUser.role,
+        // להוסיף עוד שדות שרלוונטיים אם יש
+      },
     };
 
     return res.status(201).json(response);
-  } 
-
-  /*לא יודעת מה זה ה-3 שורות של הקוד הבא הפריע לי ונתן שגיאה... */
-  // .catch (error) {
-  //   next(error);
-  // }
-
-
- // User Login
+  } catch (error) {
+    next(error);
+  }
+}
+// User Login
 async function getUserByuserNamePassword_Login(req, res, next) {
-    try {
-        const { isValid, errors } = validateSchema("user_loginSchema", req.body);
-        if (!isValid) {
-            return res.status(400).json({ errors });
-        }
+  try {
+    //console.log("req", req.body);
+    const { isValid, errors } = validateSchema("user_loginSchema", req.body);
+    if (!isValid) {
+      return res.status(400).json({ errors });
+    }
 
     const { email, password } = req.body;
     if (!email || !password) {
@@ -146,19 +111,20 @@ async function getUserByuserNamePassword_Login(req, res, next) {
         .json({ message: "Email and password are required" });
     }
 
-        const user = await findUserByEmail(email);
-        if (!user) {
-            return res.status(401).json({ message: "Email not found" }); 
-        }
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({ message: "Email not found" });
+    }
 
-        if (!(await isPasswordValid(password, user.password))) {
-            return res.status(401).json({ message: "Incorrect password" }); 
-        }
-
-        const response = {
-            message: "Login successful",
-            token: generateToken(user),
-        };
+    if (!(await isPasswordValid(password, user.password))) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+    //console.log("user", user);
+    user.token = generateToken(user);
+    const response = {
+      message: "Login successful",
+      user,
+    };
 
     return res.json(response);
   } catch (error) {
