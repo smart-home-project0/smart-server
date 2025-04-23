@@ -101,19 +101,18 @@ async function updateUser(userId, updateData) {
   return updateData;
 }
 
-async function findDevicesByfamily_id(family_id) {
+async function findDevicesAndFamilyNameByfamily_id(family_id) {
   const family = await dbHandle
     .collection(FAMILIES_COLLECTION)
     .findOne({ _id: new ObjectId(family_id) });
   if (!family) return null;
-  //if (!family.devices || family.devices.length === 0) return [];
-  // If the family has devices, fetch them from the devices collection
   const familyDevices = family.devices.map((id) => new ObjectId(id));
   const devices = await dbHandle
     .collection(DEVICES_COLLECTION)
     .find({ _id: { $in: familyDevices } })
     .toArray();
-  return devices;
+  const response = { familyName: family.name, devices };
+  return response;
 }
 
 //פונקציה לשליפת שם משפחה לפי family_id
@@ -135,5 +134,5 @@ export {
   createUser,
   findUserById,
   updateUser,
-  findDevicesByfamily_id,
+  findDevicesAndFamilyNameByfamily_id,
 };

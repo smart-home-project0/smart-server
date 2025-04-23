@@ -1,6 +1,5 @@
 //*************** Import Internal Modules ****************//
-import logger from '../utils/logger.js';
-
+import logger from "./utils/logger.js"; 
 //*************** Error Handler Function ****************//
 function errorHandler(err, req, res, next) {
     logger.error(`[ERROR] ${err.message}`);
