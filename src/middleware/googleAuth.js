@@ -9,9 +9,9 @@ async function verifyGoogleToken(req, res, next) {
     const { token } = req.body;
     try {
       const ticket = await client.verifyIdToken({
-        token,
+        idToken: token, 
         audience: CLIENT_ID,
-      });
+      });      
       const payload = ticket.getPayload();
       req.user = payload;
       next();

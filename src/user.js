@@ -6,8 +6,8 @@ import addFormats from "ajv-formats";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import verifyGoogleToken from "./middleware/googleAuth.js"; 
-
+//import verifyGoogleToken from "./middleware/googleAuth.js"; 
+//import User from './lib/schemas/user_signUpSchema.json' assert { type: "json" };
 
 // **** Load JSON Schemas using Ajv ****
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -77,7 +77,6 @@ async function isPasswordValid(inputPassword, hashedPassword) {
                 email: newUser.email,
                 familyId: newUser.familyId,
                 role: newUser.role,
-                // להוסיף עוד שדות שרלוונטיים אם יש
             }
         };
 
@@ -88,34 +87,51 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 }
 // Google Sign-Up
 async function add_signUpWithGoogle(req, res) {
-    
     try {
-        console.log('Request headers:', req.headers); // הוסף את השורה הזו
-        console.log('Google token payload:', req.user); // השתמש ב-req.user
+      console.log('Request headers:', req.headers);
+      console.log('Google token payload:', req.user);
   
-      if (!req.user || !req.user.email || !req.user.name) { // השתמש ב-req.user
+      if (!req.user || !req.user.email || !req.user.name) {
         return res.status(400).json({ success: false, message: "Invalid Google token" });
       }
   
-      const existingUser = await User.findOne({ email: req.user.email }); // השתמש ב-req.user
+      const existingUser = await findUserByEmail(req.user.email);
   
       if (existingUser) {
         return res.status(409).json({ success: false, message: "Email already exists" });
       }
   
-      const newUser = new User({
-        name: req.user.name, // השתמש ב-req.user
-        email: req.user.email, // השתמש ב-req.user
-        password: "", // No password for Google sign-in
+      const lastName = req.user.name.split(" ")[1] || req.user.name;
+      const familyId = await createFamily(lastName);
+  
+      const newUser = await createUser({
+        name: req.user.name,
+        email: req.user.email,
+        password: "", 
+        familyId,
+        role: "admin",
+        provider: "google",
       });
   
-      await newUser.save();
-      return res.status(201).json({ success: true, user: newUser._id });
+      return res.status(201).json({
+        success: true,
+        user: {
+          _id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          familyId: newUser.familyId,
+          role: newUser.role,
+          provider: newUser.provider
+        },
+        message: "Google signup successful",
+      });
+  
     } catch (error) {
       console.error("Google signup error:", error);
       return res.status(500).json({ success: false, message: "Google signup failed", error: error.message });
     }
   }
+  
       
  // User Login
  async function getUserByuserNamePassword_Login(req, res, next) {
@@ -156,7 +172,7 @@ async function add_signUpWithGoogle(req, res) {
         next(error);
     }
 }
-// Google Sign-In
+// Google Login
 async function getUserByGoogle_Login(req, res, next) {
     try {
         const { email, googleId } = req.user;
@@ -178,8 +194,8 @@ async function getUserByGoogle_Login(req, res, next) {
             user,
         });
     } catch (error) {
-        next(error);
-    }
+        console.error("Google login error:", error);
+        return res.status(500).json({ message: error.message || "Google login failed" });    }
 }
 
 // Change Password
