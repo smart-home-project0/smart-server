@@ -5,10 +5,14 @@ const SIGN_UP = "/signup";
 const LOGIN = "/login";
 const CHANGE_PASSWORD = "/change-password";
 const DEVICE_LIST_AND_FAMILY_NAME = "/devices";
-// const FAMILY_NAME = "/familyName/:family_id";
+const GOOGLE_SIGNUP = "/signup/google";
+const GOOGLE_LOGIN = "/login/google";
+const GOOGLE_CALLBACK = "/auth/callback";  // הוספת הנתיב החדש
 
 // *************** Import External Modules ****************//
-import express from "express";
+import express from 'express';
+import verifyGoogleToken from "../middleware/googleAuth.js";
+import { OAuth2Client } from 'google-auth-library';
 
 // *************** Import Internal Modules ****************//
 import * as user from "../user.js"; // Note: user.js is updated to use ES Modules
@@ -47,6 +51,46 @@ router.route(CHANGE_PASSWORD).put(user.changePassword);
 
 router.route(DEVICE_LIST_AND_FAMILY_NAME).get(device.getDeviceListAndFamilyNameByfamily_id)
 
-// router.route(ADD_DEVICE).post(user.add_device)
+
+router.route(GOOGLE_SIGNUP)
+    .post(verifyGoogleToken, user.add_signUpWithGoogle);
+
+router.route(GOOGLE_LOGIN)
+    .post(verifyGoogleToken, user.getUserByGoogle_Login);
+
+// Route to handle Google OAuth2 callback
+router.route(GOOGLE_CALLBACK)
+    .get(async (req, res, next) => {
+        try {
+            const { code } = req.query;  // קבלת קוד האישור מה-query parameter
+            if (!code) {
+                return res.status(400).json({ message: "Authorization code is missing" });
+            }
+
+            // Exchange the code for tokens using OAuth2Client
+            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            const { tokens } = await client.getToken(code);
+
+            // Verify and decode the ID token
+            const ticket = await client.verifyIdToken({
+                idToken: tokens.id_token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            const payload = ticket.getPayload();
+
+            // Store user information in session or JWT token
+            req.user = payload;
+
+            // Respond with user information or redirect to a client-side page
+            res.json({
+                message: "Google OAuth callback successful",
+                user: payload, // Send the user information
+                tokens,
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
+
 // *************** Export ****************//
 export default router;
