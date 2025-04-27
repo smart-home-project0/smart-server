@@ -93,13 +93,11 @@ async function createFamily(name) {
     .insertOne(newFamily);
   return result.insertedId;
 }
-
 async function createUser(userData) {
-  const result = await dbHandle
-    .collection(USERS_COLLECTION)
-    .insertOne(userData);
-  return result.insertedId;
+    const result = await dbHandle.collection(USERS_COLLECTION).insertOne(userData);
+    return result.insertedId; 
 }
+
 
 async function findUserById(userId) {
   return await dbHandle
