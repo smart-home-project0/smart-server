@@ -80,11 +80,12 @@ async function createFamily(name) {
     const result = await dbHandle.collection(FAMILIES_COLLECTION).insertOne(newFamily);
     return result.insertedId;
 }
-
 async function createUser(userData) {
     const result = await dbHandle.collection(USERS_COLLECTION).insertOne(userData);
-    return result.insertedId; 
+    const newUser = await dbHandle.collection(USERS_COLLECTION).findOne({ _id: result.insertedId });
+    return newUser;
 }
+
 
 async function findUserById(userId) {
     return await dbHandle.collection(USERS_COLLECTION).findOne({ _id: new ObjectId(userId) });
