@@ -112,7 +112,7 @@ async function add_signUpWithGoogle(req, res) {
         role: "admin",
         provider: "google",
       });
-  
+      console.log("New Google User Created:", newUser); // <<< הוספתי פה!
       return res.status(201).json({
         success: true,
         user: {
