@@ -3,3 +3,31 @@
 {"level":"error","message":"[ERROR] generateToken is not a function"}
 {"level":"error","message":"[ERROR] user.toObject is not a function"}
 {"level":"error","message":"[ERROR] user.toObject is not a function"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'collection')"}
+{"level":"error","message":"[ERROR] AppError is not defined"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'find')"}
+{"level":"error","message":"[ERROR] Request path contains unescaped characters"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'find')"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'find')"}
+{"level":"error","message":"[ERROR] AppError is not defined"}
+{"level":"error","message":"[ERROR] No result founds"}
+{"level":"error","message":"[ERROR] Invalid status value. Must be boolean true or false."}
+{"level":"error","message":"[ERROR] Invalid status value. Must be boolean true or false."}
+{"level":"error","message":"[ERROR] AppError is not defined"}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] Device with ID bfcca327de01d70a53yjvi not found in any family."}
+{"level":"error","message":"[ERROR] No results found for the above id"}

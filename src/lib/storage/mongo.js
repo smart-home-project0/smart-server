@@ -1,6 +1,6 @@
 import config from 'config';
 import { MongoClient, ObjectId } from 'mongodb';
-
+import AppError from '../appError.js';
 let dbHandle, mongoConn;
 
 const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
@@ -55,7 +55,7 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
         dbHandle = mongoConn.db(config.mongo.mongoDBName);
 
         logger && logger.info("Connected to MongoDB successfully");
-    } 
+    }
     catch (error) {
         logger && logger.error("MongoDB connection error", error);
         logger && logger.info(`Failed to connect to MongoDB, retrying in ${reconnectIntervalInMs} ms`);
@@ -83,7 +83,7 @@ async function createFamily(name) {
 
 async function createUser(userData) {
     const result = await dbHandle.collection(USERS_COLLECTION).insertOne(userData);
-    return result.insertedId; 
+    return result.insertedId;
 }
 
 async function findUserById(userId) {
@@ -95,7 +95,29 @@ async function updateUser(userId, updateData) {
         { _id: new ObjectId(userId) },
         { $set: updateData }
     );
-    return updateData; 
+    return updateData;
+}
+// ===================== devices functions =====================
+
+async function updateDeviceStatus(deviceId, status) {
+    const familyCollection = dbHandle.collection(FAMILIES_COLLECTION);
+    const mongoStatus = status ? "ONLINE" : "OFFLINE";
+    // עדכון סטטוס המכשיר בתוך משפחת המשתמש
+    const result = await familyCollection.updateOne(
+        { "devices._id": deviceId }, 
+        { $set: { "devices.$.status": mongoStatus } }
+    );
+    if (result.modifiedCount === 0) {
+        throw new AppError(`Device with ID ${deviceId} not found in any family.`, 400);
+    }
+    console.log(`Device ${deviceId} status updated to ${mongoStatus}.`);
+    return result.modifiedCount
 }
 
-export { connectToMongo, createCollectionIfNotExists, findUserByEmail, createFamily, createUser, findUserById, updateUser };
+async function printDeviceStatus(deviceId) {
+    const family = await dbHandle.collection(FAMILIES_COLLECTION).findOne({ "devices._id": { $regex: deviceId.trim() } });
+console.log(JSON.stringify(family, null, 2));
+}
+
+
+export { connectToMongo, createCollectionIfNotExists, findUserByEmail, createFamily, createUser, findUserById, updateUser, updateDeviceStatus,printDeviceStatus };

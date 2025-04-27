@@ -1,6 +1,6 @@
 // **** Import necessary dependencies ****
 import bcrypt from "bcrypt";
-import generateToken from "./utils/generateToken.js";
+import generateToken from "./lib/utils/generateToken.js";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import fs from "fs";

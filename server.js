@@ -9,8 +9,9 @@ import { connectToMongo } from "./src/lib/storage/mongo.js";
 import router from "./src/lib/router.js";  // General routes including user routes
 import errorHandler from "./src/lib/errorHandler.js";
 import dotenv from "dotenv";
-dotenv.config();
+
 // *************** Application Initialization **************//
+dotenv.config();
 const app = express();
 const port = config.has("port") ? config.get("port") : 3000;
 let mongoConnected = false;
