@@ -4,6 +4,7 @@ const THROW_ERROR = "/throwError";
 const SIGN_UP = "/signup";
 const LOGIN = "/login";
 const CHANGE_PASSWORD = "/change-password";
+const DEVICE_LIST_AND_FAMILY_NAME = "/devices";
 const GOOGLE_SIGNUP = "/signup/google";
 const GOOGLE_LOGIN = "/login/google";
 const GOOGLE_CALLBACK = "/auth/callback";  // הוספת הנתיב החדש
@@ -14,42 +15,42 @@ import verifyGoogleToken from "../middleware/googleAuth.js";
 import { OAuth2Client } from 'google-auth-library';
 
 // *************** Import Internal Modules ****************//
-import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
+import * as user from "../user.js"; // Note: user.js is updated to use ES Modules
+import * as device from "../device.js"
+//import * as family from "../family.js"
 
 const router = express.Router();
 
 // *************** Internal Functions ****************//
 function throwError() {
-    throw Error("Intentionally throwing error to test default error handler");
+  throw Error("Intentionally throwing error to test default error handler");
 }
 
 // *************** Routes ****************//
 
 // General route example: hello world
-router.route(HELLO_WORLD)
-    .get(async function helloWorld(req, res, next) {
-        try {
-            req.metricsId = "helloWorld";
-            const name = req.query.user || "";
-            res.json({ message: 'Hello IH world! ' + name });
-        } catch (err) {
-            next(err);
-        }
-    });
+router.route(HELLO_WORLD).get(async function helloWorld(req, res, next) {
+  try {
+    req.metricsId = "helloWorld";
+    const name = req.query.user || "";
+    res.json({ message: "Hello IH world! " + name });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Route to test error handling
-router.route(THROW_ERROR)
-    .get(throwError);
+router.route(THROW_ERROR).get(throwError);
 
 // User routes: using the functions imported from user.js
-router.route(SIGN_UP)
-    .post(user.add_signUp);
+router.route(SIGN_UP).post(user.add_signUp);
 
-router.route(LOGIN)
-    .post(user.getUserByuserNamePassword_Login);
+router.route(LOGIN).post(user.getUserByuserNamePassword_Login);
 
-router.route(CHANGE_PASSWORD)
-    .put(user.changePassword);
+router.route(CHANGE_PASSWORD).put(user.changePassword);
+
+router.route(DEVICE_LIST_AND_FAMILY_NAME).get(device.getDeviceListAndFamilyNameByfamily_id)
+
 
 router.route(GOOGLE_SIGNUP)
     .post(verifyGoogleToken, user.add_signUpWithGoogle);

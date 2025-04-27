@@ -10,6 +10,7 @@
     "password": "",
     "connectTimeoutMS": 60000,
     "usersCollectionName": "users",
-    "familiesCollectionName": "families"
+    "familiesCollectionName": "families",
+    "devicesCollectionName": "devices"
   }
 }

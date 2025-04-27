@@ -1,6 +1,6 @@
 // **** Import necessary dependencies ****
 import bcrypt from "bcrypt";
-import generateToken from "./utils/generateToken.js";
+import generateToken from "./lib/utils/generateToken.js";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import fs from "fs";
@@ -17,29 +17,89 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const schemasDir = path.join(__dirname, "lib", "schemas");
 
 fs.readdirSync(schemasDir).forEach((file) => {
-    const schema = JSON.parse(fs.readFileSync(path.join(schemasDir, file), "utf-8"));
-    ajv.addSchema(schema, schema.$id);
+  const schema = JSON.parse(
+    fs.readFileSync(path.join(schemasDir, file), "utf-8")
+  );
+  ajv.addSchema(schema, schema.$id);
 });
 
 // Function to validate data against a JSON schema
- const validateSchema = (schemaId, data) => {
-    const validate = ajv.getSchema(schemaId);
-    if (!validate) {
-        throw new Error(`Schema ${schemaId} not found`);
-    }
-    const isValid = validate(data);
-    return { isValid, errors: validate.errors };
+const validateSchema = (schemaId, data) => {
+  const validate = ajv.getSchema(schemaId);
+  if (!validate) {
+    throw new Error(`Schema ${schemaId} not found`);
+  }
+  const isValid = validate(data);
+  return { isValid, errors: validate.errors };
 };
 
 // Import MongoDB helper functions from mongo.js
-import { findUserByEmail, createFamily, createUser, findUserById, updateUser } from "./lib/storage/mongo.js";
+import {
+  findUserByEmail,
+  createFamily,
+  createUser,
+  findUserById,
+  updateUser,
+} from "./lib/storage/mongo.js";
 
 // Function to check if the provided password matches the hashed password
 async function isPasswordValid(inputPassword, hashedPassword) {
-    return await bcrypt.compare(inputPassword, hashedPassword);
+  return await bcrypt.compare(inputPassword, hashedPassword);
 }
 
 // User Signup
+
+// <<<<<<< HEAD
+// async function add_signUp(req, res, next) {
+//   try {
+//     const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
+//     if (!isValid) {
+//       return res.status(400).json({ errors });
+//     }
+
+//     const { name, email, password, familyId } = req.body;
+//     const existingUser = await findUserByEmail(email);
+//     if (existingUser) {
+//       return res
+//         .status(400)
+//         .json({ message: "User with this email already exists" });
+//     }
+
+//     let finalFamilyId = familyId;
+//     if (!finalFamilyId) {
+//       const lastName = name.split(" ")[1] || name;
+//       finalFamilyId = await createFamily(lastName);
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const newUser = await createUser({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       familyId: finalFamilyId,
+//       role: "admin",
+//     });
+
+//     const response = {
+//       message: "User registered successfully",
+//       token: generateToken(newUser),
+//       user: {
+//         _id: newUser._id,
+//         name: newUser.name,
+//         email: newUser.email,
+//         familyId: newUser.familyId,
+//         role: newUser.role,
+//         // להוסיף עוד שדות שרלוונטיים אם יש
+//       },
+//     };
+
+//     return res.status(201).json(response);
+//   } catch (error) {
+//     next(error);
+//   }
+// }
+// // User Login
+// =======
  async function add_signUp(req, res, next) {
     try {
         const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
@@ -47,16 +107,16 @@ async function isPasswordValid(inputPassword, hashedPassword) {
             return res.status(400).json({ errors });
         }
 
-        const { name, email, password, familyId } = req.body;
+        const { name, email, password, family_id } = req.body;
         const existingUser = await findUserByEmail(email);
         if (existingUser) {
             return res.status(400).json({ message: "User with this email already exists" });
         }
 
-        let finalFamilyId = familyId;
-        if (!finalFamilyId) {
+        let finalfamily_id = family_id;
+        if (!finalfamily_id) {
             const lastName = name.split(" ")[1] || name;
-            finalFamilyId = await createFamily(lastName);
+            finalfamily_id = await createFamily(lastName);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -64,7 +124,7 @@ async function isPasswordValid(inputPassword, hashedPassword) {
             name,
             email,
             password: hashedPassword,
-            familyId: finalFamilyId,
+            family_id: finalfamily_id,
             role: "admin",
         });
 
@@ -75,7 +135,7 @@ async function isPasswordValid(inputPassword, hashedPassword) {
                 _id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
-                familyId: newUser.familyId,
+                family_id: newUser.family_id,
                 role: newUser.role,
             }
         };
@@ -84,7 +144,42 @@ async function isPasswordValid(inputPassword, hashedPassword) {
     } catch (error) {
         next(error);
     }
-}
+
+
+  //   const { name, email, password, family_id } = req.body;
+  //   const existingUser = await findUserByEmail(email);
+  //   if (existingUser) {
+  //     return res
+  //       .status(400)
+  //       .json({ message: "User with this email already exists" });
+  //   }
+
+  //   let finalfamily_id = family_id;
+  //   if (!finalfamily_id) {
+  //     const lastName = name.split(" ")[1] || name;
+  //     finalfamily_id = await createFamily(lastName);
+  //   }
+
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+  //   const newUser = await createUser({
+  //     name,
+  //     email,
+  //     password: hashedPassword,
+  //     family_id: finalfamily_id,
+  //     role: "admin",
+  //   });
+
+  //   const response = {
+  //     message: "User registered successfully",
+  //     token: generateToken(newUser),
+  //     family_id: finalfamily_id,
+  //   };
+
+  //   return res.status(201).json(response);
+  // } 
+
+
+
 // Google Sign-Up
 async function add_signUpWithGoogle(req, res) {
     try {
@@ -102,13 +197,13 @@ async function add_signUpWithGoogle(req, res) {
       }
   
       const lastName = req.user.name.split(" ")[1] || req.user.name;
-      const familyId = await createFamily(lastName);
+      const family_id = await createFamily(lastName);
   
       const newUser = await createUser({
         name: req.user.name,
         email: req.user.email,
         password: "", 
-        familyId,
+        family_id,
         role: "admin",
         provider: "google",
       });
@@ -119,7 +214,7 @@ async function add_signUpWithGoogle(req, res) {
           _id: newUser._id,
           name: newUser.name,
           email: newUser.email,
-          familyId: newUser.familyId,
+          family_id: newUser.family_id,
           role: newUser.role,
           provider: newUser.provider
         },
@@ -132,50 +227,47 @@ async function add_signUpWithGoogle(req, res) {
     }
   }
   
-      
  // User Login
- async function getUserByuserNamePassword_Login(req, res, next) {
-    try {
-        const { isValid, errors } = validateSchema("user_loginSchema", req.body);
-        if (!isValid) {
-            return res.status(400).json({ errors });
-        }
-
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(401).json({ message: "Email and password are required" });
-        }
-
-        const user = await findUserByEmail(email);
-        if (!user) {
-            return res.status(401).json({ message: "Email not found" });
-        }
-
-        if (!(await isPasswordValid(password, user.password))) {
-            return res.status(401).json({ message: "Incorrect password" });
-        }
-
-        const response = {
-            message: "Login successful",
-            token: generateToken(user),
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                familyId: user.familyId,
-                // להוסיף עוד שדות שרלוונטיים
-            }
-        };
-
-        return res.json(response);
-    } catch (error) {
-        next(error);
+async function getUserByuserNamePassword_Login(req, res, next) {
+  try {
+    //console.log("req", req.body);
+    const { isValid, errors } = validateSchema("user_loginSchema", req.body);
+    if (!isValid) {
+      return res.status(400).json({ errors });
     }
+
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res
+        .status(401)
+        .json({ message: "Email and password are required" });
+    }
+
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({ message: "Email not found" });
+    }
+
+    if (!(await isPasswordValid(password, user.password))) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+    //console.log("user", user);
+    user.token = generateToken(user);
+    const response = {
+      message: "Login successful",
+      user,
+    };
+
+    return res.json(response);
+  } catch (error) {
+    next(error);
+  }
 }
 // Google Login
 async function getUserByGoogle_Login(req, res, next) {
     try {
         const { email, googleId } = req.user;
+
 
         const user = await findUserByEmail(email);
         if (!user) {
@@ -200,31 +292,35 @@ async function getUserByGoogle_Login(req, res, next) {
 
 // Change Password
 async function changePassword(req, res, next) {
-    try {
-        const { isValid, errors } = validateSchema("user_updatePasswordSchema", req.body);
-        if (!isValid) {
-            return res.status(400).json({ errors });
-        }
-
-        const { oldPassword, newPassword } = req.body;
-        if (!oldPassword || !newPassword) {
-            return res.status(401).json({ message: "Incorrect old password" });
-        }
-
-        const user = await findUserById(req.user.userId);
-        if (!user || !(await isPasswordValid(oldPassword, user.password))) {
-            return res.status(401).json({ message: "Incorrect old password" });
-        }
-
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-        await updateUser(user._id, { password: hashedNewPassword });
-
-        const response = { message: "Password updated successfully" };
-        return res.json(response);
-    } catch (error) {
-        next(error);
+  try {
+    const { isValid, errors } = validateSchema(
+      "user_updatePasswordSchema",
+      req.body
+    );
+    if (!isValid) {
+      return res.status(400).json({ errors });
     }
-}
 
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(401).json({ message: "Incorrect old password" });
+    }
+
+    const user = await findUserById(req.user.userId);
+    if (!user || !(await isPasswordValid(oldPassword, user.password))) {
+      return res.status(401).json({ message: "Incorrect old password" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await updateUser(user._id, { password: hashedNewPassword });
+
+    const response = { message: "Password updated successfully" };
+    return res.json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+ }
 // Export all functions in one line
-export { add_signUp, getUserByuserNamePassword_Login, changePassword,add_signUpWithGoogle, getUserByGoogle_Login };
+export { add_signUp, getUserByuserNamePassword_Login, changePassword, add_signUpWithGoogle, getUserByGoogle_Login };
+ 
