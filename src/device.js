@@ -49,7 +49,7 @@ async function getDeviceListAndFamilyNameByfamily_id(req, res, next) {
     if (response == null) {
       return res.status(404).json({ message: "Family not found" });
     }
-    return res.status(200).json(createResponse(true,"Devices and family name fetched successfully", response)) ;
+    return res.status(200).json(createResponse("Devices and family name fetched successfully", response)) ;
   } catch (error) {
     next(error);
   }
@@ -74,7 +74,7 @@ async function toggle(req, res, next) {
     const updatedStatus = await getStatusByDeviceId(deviceId);
     const deviceStatus = updatedStatus ? "ON" : "OFF";
 
-    res.status(200).json(createResponse(true, `Device ${deviceId} status changed successfully.`, { status: deviceStatus }));
+    res.status(200).json(createResponse( `Device ${deviceId} status changed successfully.`, { status: deviceStatus }));
   } catch (error) {
     console.error("Error toggling device:", error);
     next(error);
@@ -90,7 +90,7 @@ async function getStatus(req, res, next) {
     }
     const status = await getStatusByDeviceId(deviceId);
     const deviceStatus = status ? "ON" : "OFF";
-    res.status(200).json(createResponse(true, `Device status retrieved successfully.`, { status: deviceStatus }));
+    res.status(200).json(createResponse( `Device status retrieved successfully.`, { status: deviceStatus }));
   } catch (error) {
     console.error("Error getting device status:", error);
     next(error);

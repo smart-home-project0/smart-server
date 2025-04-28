@@ -1,4 +1,4 @@
-function createResponse(success, message, data = null) {
+function createResponse(success=true, message, data = null) {
     return {
         type:"smartHome",
         success,
