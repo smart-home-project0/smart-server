@@ -1,3 +1,4 @@
+// *************** Require External Modules ****************//
 import jwt from "jsonwebtoken";
 
 export default function generateToken(user) {

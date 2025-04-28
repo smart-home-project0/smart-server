@@ -1,7 +1,9 @@
+// *************** Require External Modules ****************//
 import { TuyaContext } from '@tuya/tuya-connector-nodejs';
 import dotenv from "dotenv"
+
+// *************** Require Internal Modules ****************//
 import AppError from "../appError.js";
-import { log } from 'node:console';
 
 dotenv.config();
 

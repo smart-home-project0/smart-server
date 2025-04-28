@@ -1,13 +1,20 @@
-// **** Import necessary dependencies ****
-import bcrypt from "bcrypt";
-import generateToken from "./lib/utils/generateToken.js";
+// *************** Require External Modules ****************//import bcrypt from "bcrypt";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-//import verifyGoogleToken from "./middleware/googleAuth.js"; 
-//import User from './lib/schemas/user_signUpSchema.json' assert { type: "json" };
+
+// *************** Require Internal Modules ****************//
+import generateToken from "./lib/utils/generateToken.js";
+import {
+  findUserByEmail,
+  createFamily,
+  createUser,
+  findUserById,
+  updateUser,
+} from "./lib/storage/mongo.js";
+
 
 // **** Load JSON Schemas using Ajv ****
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -33,15 +40,6 @@ const validateSchema = (schemaId, data) => {
   return { isValid, errors: validate.errors };
 };
 
-// Import MongoDB helper functions from mongo.js
-import {
-  findUserByEmail,
-  createFamily,
-  createUser,
-  findUserById,
-  updateUser,
-} from "./lib/storage/mongo.js";
-
 // Function to check if the provided password matches the hashed password
 async function isPasswordValid(inputPassword, hashedPassword) {
   return await bcrypt.compare(inputPassword, hashedPassword);
@@ -49,7 +47,6 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 
 // User Signup
 
-// <<<<<<< HEAD
 // async function add_signUp(req, res, next) {
 //   try {
 //     const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
@@ -98,8 +95,8 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 //     next(error);
 //   }
 // }
-// // User Login
-// =======
+
+// User Login
  async function add_signUp(req, res, next) {
     try {
         const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
@@ -145,7 +142,6 @@ async function isPasswordValid(inputPassword, hashedPassword) {
         next(error);
     }
 
-
   //   const { name, email, password, family_id } = req.body;
   //   const existingUser = await findUserByEmail(email);
   //   if (existingUser) {
@@ -177,8 +173,6 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 
   //   return res.status(201).json(response);
   // } 
-
-
 
 // Google Sign-Up
 async function add_signUpWithGoogle(req, res) {
@@ -235,7 +229,6 @@ async function getUserByuserNamePassword_Login(req, res, next) {
     if (!isValid) {
       return res.status(400).json({ errors });
     }
-
     const { email, password } = req.body;
     if (!email || !password) {
       return res

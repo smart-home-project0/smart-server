@@ -48,7 +48,7 @@ async function getDeviceListAndFamilyNameByfamily_id(req, res, next) {
       return res.status(401).json({ message: "family_id is required" });
     }
     const response = await findDevicesAndFamilyNameByfamily_id(family_id);
-    console.log("response: ",response);
+    console.log("response: ", response);
     if (response == null) {
       return res.status(404).json({ message: "Family not found" });
     }
@@ -60,45 +60,49 @@ async function getDeviceListAndFamilyNameByfamily_id(req, res, next) {
 
 //     method: 'PUT',
 async function toggle(req, res, next) {
-    const deviceId = req.params.deviceId;
-    const { status } = req.body;
-    try {
-        if (!deviceId) {
-            throw new AppError("Device ID is required and must be of type String.", 400);
-        }
-        if (typeof status !== "boolean") {
-            throw new AppError("Invalid status value. Must be boolean true or false.", 400);
-        }
-        // שליחת בקשה לשנות את הסטטוס ב-Tuya
-        await toggleDevice(deviceId, status);
-        // המתן 2 שניות כדי לאפשר ל-Tuya לעדכן את הסטטוס
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        // קבלת הסטטוס המעודכן מ-Tuya
-        const updatedStatus = await getStatusByDeviceId(deviceId);
-        const deviceStatus = updatedStatus ? "ON" : "OFF";
-
-        res.status(200).json(createResponse(true, `Device ${deviceId} status changed successfully.`, { status: deviceStatus }));
-    } catch (error) {
-        console.error("Error toggling device:", error);
-        next(error);
+  const deviceId = req.params.deviceId;
+  const { status } = req.body;
+  try {
+    if (!deviceId) {
+      throw new AppError("Device ID is required and must be of type String.", 400);
     }
+    if (typeof status !== "boolean") {
+      throw new AppError("Invalid status value. Must be boolean true or false.", 400);
+    }
+    // שליחת בקשה לשנות את הסטטוס ב-Tuya
+    await toggleDevice(deviceId, status);
+    // המתן 2 שניות כדי לאפשר ל-Tuya לעדכן את הסטטוס
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    // קבלת הסטטוס המעודכן מ-Tuya
+    const updatedStatus = await getStatusByDeviceId(deviceId);
+    const deviceStatus = updatedStatus ? "ON" : "OFF";
+
+    res.status(200).json(createResponse(true, `Device ${deviceId} status changed successfully.`, { status: deviceStatus }));
+  } catch (error) {
+    console.error("Error toggling device:", error);
+    next(error);
+  }
 }
 
 //     method: 'GET',
 async function getStatus(req, res, next) {
-    const deviceId = req.params.deviceId;
-    try {
-        if (!deviceId) {
-            throw new AppError("Device ID is required.", 400);
-        }
-        const status = await getStatusByDeviceId(deviceId);
-        const deviceStatus = status ? "ON" : "OFF";
-        res.status(200).json(createResponse(true, `Device status retrieved successfully.`, { status: deviceStatus }));
-    } catch (error) {
-        console.error("Error getting device status:", error);
-        next(error);
+  const deviceId = req.params.deviceId;
+  try {
+    if (!deviceId) {
+      throw new AppError("Device ID is required.", 400);
     }
+    const status = await getStatusByDeviceId(deviceId);
+    const deviceStatus = status ? "ON" : "OFF";
+    res.status(200).json(createResponse(true, `Device status retrieved successfully.`, { status: deviceStatus }));
+  } catch (error) {
+    console.error("Error getting device status:", error);
+    next(error);
+  }
 }
 
-export { getDeviceListAndFamilyNameByfamily_id,toggle, getStatus };
+export {
+  getDeviceListAndFamilyNameByfamily_id,
+  toggle,
+  getStatus
+};
 

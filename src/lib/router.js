@@ -1,3 +1,13 @@
+// *************** Import External Modules ****************//
+import express from 'express';
+import verifyGoogleToken from "../middleware/googleAuth.js";
+import { OAuth2Client } from 'google-auth-library';
+
+// *************** Import Internal Modules ****************//
+import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
+import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
+import AppError from './appError.js';
+
 // *************** Constants ****************//
 const HELLO_WORLD = "/helloworld";
 const THROW_ERROR = "/throwError";
@@ -9,22 +19,13 @@ const TOGGLE_DEVICE = "/device/toggle/:deviceId";
 const DEVICE_LIST_AND_FAMILY_NAME = "/devices";
 const GOOGLE_SIGNUP = "/signup/google";
 const GOOGLE_LOGIN = "/login/google";
-const GOOGLE_CALLBACK = "/auth/callback";  // הוספת הנתיב החדש
-
-// *************** Import External Modules ****************//
-import express from 'express';
-import verifyGoogleToken from "../middleware/googleAuth.js";
-import { OAuth2Client } from 'google-auth-library';
-
-// *************** Import Internal Modules ****************//
-import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
-import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
+const GOOGLE_CALLBACK = "/auth/callback"; 
 
 const router = express.Router();
 
 // *************** Internal Functions ****************//
 function throwError() {
-  throw Error("Intentionally throwing error to test default error handler");
+  throw new AppError("Intentionally throwing error to test default error handler");
 }
 
 // *************** Routes ****************//
@@ -87,9 +88,9 @@ router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
         }
     });
 
-router.route(DEVICE_LIST_AND_FAMILY_NAME).get(device.getDeviceListAndFamilyNameByfamily_id);
-
 // Device routes: using the functions imported from device.js
+
+router.route(DEVICE_LIST_AND_FAMILY_NAME).get(device.getDeviceListAndFamilyNameByfamily_id);
 
 router.route(GET_STATUS_DEVICE).get(device.getStatus);
 
