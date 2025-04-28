@@ -1,8 +1,12 @@
+// *************** Require External Modules ****************//
 import jwt from "jsonwebtoken";
+
+// *************** Require Internal Modules ****************//
+import AppError from "../appError.js";
 
 export default function generateToken(user) {
     if (!process.env.SECRET_KEY) {
-        throw new Error("SECRET_KEY is not defined in environment variables");
+        throw new AppError("SECRET_KEY is not defined in environment variables",500);
     }
 
     const payload = {

@@ -7,3 +7,7 @@
 {"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
 {"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
 {"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+
+{"level":"error","message":"[ERROR] No result found for deviceId: bfcca327de01d70a5"}
+{"level":"error","message":"[ERROR] No result found for deviceId: 2"}
+{"level":"error","message":"[ERROR] No result found for deviceId: bfcca327de01d"}

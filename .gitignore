@@ -1,10 +1,6 @@
 node_modules/
-package-lock.json
-.env
-package-lock.json
-config/.env
 todo
 knowledge.txt
-.env
 .gitignore
+package-lock.json
 

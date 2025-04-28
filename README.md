@@ -1,6 +1,14 @@
 # smart-server
 the server that use for integration with client and 3 parties.
 
+# Two important points
+1. class appError - When you want to return an error, return it in this format:
+throw new AppError( message, error status)
+2. createResponse - When you want to return a response, return it in this format:
+res.status(200).json(createRespons(message,data))
+These 2 files are under the lib folder
+
+
 # Directory Structure
 
 │── README.md              # Project documentation
@@ -19,6 +27,8 @@ the server that use for integration with client and 3 parties.
 |   │   ├── utils/             # Utility functions
 │   |   │   └── logger.js      # Manages logging functionality
 │   │   ├── errorHandler.js  # Global error management
+│   │   ├── appError.js      # Returning a uniform generic error
+│   │   ├── response.js  # Returning a uniform generic answer
 │   │   ├── router.js       # Defines server routes
 |   |   |   ├── user.js     # All user-related functions
 │   │   ├── storage/
