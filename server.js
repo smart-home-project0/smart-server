@@ -17,8 +17,14 @@ const port = config.has("port") ? config.get("port") : 3000;
 let mongoConnected = false;
 
 // *************** Middleware Setup **************//
+// *************** Middleware Setup **************//
 app.use(express.json());
-app.use(cors());
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL, // קרא את כתובת ה-Frontend מהמשתנה בסביבה
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
 app.use(morgan("dev"));
 
 

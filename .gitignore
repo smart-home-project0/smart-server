@@ -2,3 +2,5 @@ node_modules/
 todo
 knowledge.txt
 .gitignore
+package-lock.json
+.env
