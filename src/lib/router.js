@@ -2,7 +2,7 @@
 import express from 'express';
 import verifyGoogleToken from "../middleware/googleAuth.js";
 import { OAuth2Client } from 'google-auth-library';
-
+import authenticateToken from "../middleware/authMiddleware.js";
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
@@ -50,13 +50,13 @@ router.route(SIGN_UP).post(user.add_signUp);
 
 router.route(LOGIN).post(user.getUserByuserNamePassword_Login);
 
-router.route(CHANGE_PASSWORD).put(user.changePassword);
+router.route(CHANGE_PASSWORD).put(authenticateToken, user.changePassword);
 
 router.route(GOOGLE_SIGNUP).post(verifyGoogleToken, user.add_signUpWithGoogle);
 
 router.route(GOOGLE_LOGIN).post(verifyGoogleToken, user.getUserByGoogle_Login);
 
-// Route to handle Google OAuth2 callback
+//Route to handle Google OAuth2 callback
 router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
         try {
             const { code } = req.query;  // קבלת קוד האישור מה-query parameter
@@ -90,11 +90,8 @@ router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
 
 // Device routes: using the functions imported from device.js
 
-router.route(DEVICE_LIST_AND_FAMILY_NAME).get(device.getDeviceListAndFamilyNameByfamily_id);
-
-router.route(GET_STATUS_DEVICE).get(device.getStatus);
-
-router.route(TOGGLE_DEVICE).put(device.toggle);
-
+router.route(DEVICE_LIST_AND_FAMILY_NAME).get(authenticateToken, device.getDeviceListAndFamilyNameByfamily_id);
+router.route(GET_STATUS_DEVICE).get(authenticateToken, device.getStatus);
+router.route(TOGGLE_DEVICE).put(authenticateToken, device.toggle);
 // *************** Export ****************//
 export default router;
