@@ -4,7 +4,7 @@ the server that use for integration with client and 3 parties.
 # Two important points
 1. class appError - When you want to return an error, return it in this format:
 throw new AppError( message, error status)
-2. createResponse - When you want to return a response, return it in this format:
+2. No in use!!!  createResponse - When you want to return a response, return it in this format:
 res.status(200).json(createRespons(message,data))
 These 2 files are under the lib folder
 
