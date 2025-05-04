@@ -18,8 +18,7 @@ import {
   findUserById,
   updateUser,
   createUserSession,
-  findSessionByToken,
-  deleteSessionByToken,
+  findSessionByToken
 } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
 
@@ -225,18 +224,18 @@ async function refreshAccessToken(req, res, next) {
   }
 }
 
-async function logoutUser(req, res, next) {
-  try {
-    const refreshToken = req.cookies.refreshToken;
-    if (refreshToken) {
-      await deleteSessionByToken(refreshToken);
-      res.clearCookie("refreshToken");
-    }
-    res.json({ message: "Logged out successfully" });
-  } catch (error) {
-    next(error);
-  }
-}
+// async function logoutUser(req, res, next) {
+//   try {
+//     const refreshToken = req.cookies.refreshToken;
+//     if (refreshToken) {
+//       await deleteSessionByToken(refreshToken);
+//       res.clearCookie("refreshToken");
+//     }
+//     res.json({ message: "Logged out successfully" });
+//   } catch (error) {
+//     next(error);
+//   }
+// }
 
 export {
   add_signUp,
@@ -245,5 +244,4 @@ export {
   add_signUpWithGoogle,
   getUserByGoogle_Login,
   refreshAccessToken,
-  logoutUser,
 };

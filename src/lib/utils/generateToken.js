@@ -13,7 +13,7 @@ export function generateAccessToken(user) {
   const payload = {
     userId: user._id,
     name: user.name,
-    roleId: user.role_id,
+    role: user.role,
   };
 
   return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
