@@ -65,19 +65,16 @@ async function toggle(req, res, next) {
       throw new AppError("Invalid status value. Must be boolean true or false.", 400);
     }
     // שליחת בקשה לשנות את הסטטוס ב-Tuya
+    // console.time("tuyaToggle");
     await toggleDevice(deviceId, status);
-    // המתן 2 שניות
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // console.timeEnd("tuyaToggle");   
     // עדכון הסטטוס במונגו
-    const updateStatusInMomgo = await updateDeviceStatus(deviceId, status);
-    // קבלת הסטטוס המעודכן מ-Tuya
-    const updatedStatus = await getStatusByDeviceId(deviceId);
-    const deviceStatus = updatedStatus ? "ON" : "OFF";
-    //בדיקה שאכן הסטטוס אצל טויה השתנה
-    if (updatedStatus != status)
-      res.status(200).json({ Message: `The status of device ${deviceId} has not changed.`, status: deviceStatus });
+    // console.time("mongoUpdate");
+    const updateStatusInMongo = await updateDeviceStatus(deviceId, status);
+    // console.timeEnd("mongoUpdate");
+    const deviceStatus = status ? "ON" : "OFF";
     //בדיקה אם הסטטוס במונגו שונה 
-    if (updateStatusInMomgo === 0)
+    if (updateStatusInMongo === 0)
       res.status(200).json({ Message: `No update was needed. Device status ${deviceId} has not changed.`, status: deviceStatus });
     res.status(200).json({ message: `Device ${deviceId} status changed successfully.`, status: deviceStatus });
   } catch (error) {
@@ -85,7 +82,6 @@ async function toggle(req, res, next) {
     next(error);
   }
 }
-
 //     method: 'GET',
 async function getStatus(req, res, next) {
   const deviceId = req.params.deviceId;
