@@ -16,3 +16,5 @@
 {"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
 {"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
 {"level":"error","message":"[ERROR] User with this email already exists"}
+{"level":"error","message":"[ERROR] Access token missing"}
+{"level":"error","message":"[ERROR] Access token missing"}

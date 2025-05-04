@@ -87,14 +87,14 @@ async function createUserSession(userId, refreshToken, expiresAt) {
     await dbHandle.collection(SESSIONS_COLLECTION).insertOne(session);
     return session;
 }
-
-async function findSessionByRefreshToken(token) {
+async function findSessionByToken(token) {
     return await dbHandle.collection(SESSIONS_COLLECTION).findOne({ refreshToken: token });
 }
 
-async function deleteSessionByRefreshToken(token) {
+async function deleteSessionByToken(token) {
     await dbHandle.collection(SESSIONS_COLLECTION).deleteOne({ refreshToken: token });
 }
+
 
 async function deleteAllUserSessions(userId) {
     await dbHandle.collection(SESSIONS_COLLECTION).deleteMany({ userId: new ObjectId(userId) });
@@ -158,7 +158,7 @@ export {
     updateDeviceStatus,
     printDeviceStatus,
     createUserSession,
-    findSessionByRefreshToken,
-    deleteSessionByRefreshToken,
+    findSessionByToken,
+    deleteSessionByToken,
     deleteAllUserSessions,
 };

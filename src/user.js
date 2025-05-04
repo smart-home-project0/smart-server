@@ -7,7 +7,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // *************** Require Internal Modules ****************//
-import { generateAccessToken, generateRefreshToken } from "./lib/utils/generateToken.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "./lib/utils/generateToken.js";
 import {
   findUserByEmail,
   createFamily,
@@ -15,6 +18,8 @@ import {
   findUserById,
   updateUser,
   createUserSession,
+  findSessionByToken,
+  deleteSessionByToken,
 } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
 
@@ -44,17 +49,15 @@ async function isPasswordValid(inputPassword, hashedPassword) {
 }
 
 /**
- * Issue tokens and persist refreshSession
+ * Issue tokens and persist refresh session
  */
 async function sendTokenResponse(res, user) {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-  // Persist refresh token session
   await createUserSession(user._id, refreshToken, expiresAt);
 
-  // Send httpOnly cookie
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -82,7 +85,8 @@ async function add_signUp(req, res, next) {
 
     const { name, email, password, family_id } = req.body;
     const existingUser = await findUserByEmail(email);
-    if (existingUser) throw new AppError("User with this email already exists", 400);
+    if (existingUser)
+      throw new AppError("User with this email already exists", 400);
 
     let finalFamilyId = family_id;
     if (!finalFamilyId) {
@@ -113,7 +117,8 @@ async function add_signUpWithGoogle(req, res, next) {
     }
 
     const existingUser = await findUserByEmail(req.user.email);
-    if (existingUser) throw new AppError("User with this email already exists", 409);
+    if (existingUser)
+      throw new AppError("User with this email already exists", 409);
 
     const lastName = req.user.name.split(" ")[1] || req.user.name;
     const familyId = await createFamily(lastName);
@@ -140,7 +145,8 @@ async function getUserByuserNamePassword_Login(req, res, next) {
     if (!isValid) throw new AppError(`Invalid input ${errors}`, 400);
 
     const { email, password } = req.body;
-    if (!email || !password) throw new AppError("Email and password are required", 401);
+    if (!email || !password)
+      throw new AppError("Email and password are required", 401);
 
     const user = await findUserByEmail(email);
     if (!user) throw new AppError("Email not found", 401);
@@ -174,7 +180,10 @@ async function getUserByGoogle_Login(req, res, next) {
 
 async function changePassword(req, res, next) {
   try {
-    const { isValid, errors } = validateSchema("user_updatePasswordSchema", req.body);
+    const { isValid, errors } = validateSchema(
+      "user_updatePasswordSchema",
+      req.body
+    );
     if (!isValid) throw new AppError(`Invalid input ${errors}`, 400);
 
     const { oldPassword, newPassword } = req.body;
@@ -196,10 +205,45 @@ async function changePassword(req, res, next) {
   }
 }
 
+async function refreshAccessToken(req, res, next) {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) throw new AppError("No refresh token provided", 401);
+
+    const session = await findSessionByToken(token);
+    if (!session || session.expiresAt < new Date()) {
+      throw new AppError("Invalid or expired refresh token", 403);
+    }
+
+    const user = await findUserById(session.userId);
+    if (!user) throw new AppError("User not found", 404);
+
+    const newAccessToken = generateAccessToken(user);
+    res.json({ token: newAccessToken });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function logoutUser(req, res, next) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      await deleteSessionByToken(refreshToken);
+      res.clearCookie("refreshToken");
+    }
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export {
   add_signUp,
   getUserByuserNamePassword_Login,
   changePassword,
   add_signUpWithGoogle,
   getUserByGoogle_Login,
+  refreshAccessToken,
+  logoutUser,
 };
