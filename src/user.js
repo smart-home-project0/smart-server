@@ -14,6 +14,7 @@ import {
   createUser,
   findUserById,
   updateUser,
+  createUserSession,
 } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
 
@@ -42,15 +43,23 @@ async function isPasswordValid(inputPassword, hashedPassword) {
   return await bcrypt.compare(inputPassword, hashedPassword);
 }
 
-function sendTokenResponse(res, user) {
+/**
+ * Issue tokens and persist refreshSession
+ */
+async function sendTokenResponse(res, user) {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+  // Persist refresh token session
+  await createUserSession(user._id, refreshToken, expiresAt);
+
+  // Send httpOnly cookie
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ימים
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   return {
@@ -75,10 +84,10 @@ async function add_signUp(req, res, next) {
     const existingUser = await findUserByEmail(email);
     if (existingUser) throw new AppError("User with this email already exists", 400);
 
-    let finalfamily_id = family_id;
-    if (!finalfamily_id) {
+    let finalFamilyId = family_id;
+    if (!finalFamilyId) {
       const lastName = name.split(" ")[1] || name;
-      finalfamily_id = await createFamily(lastName);
+      finalFamilyId = await createFamily(lastName);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -86,11 +95,11 @@ async function add_signUp(req, res, next) {
       name,
       email,
       password: hashedPassword,
-      family_id: finalfamily_id,
+      family_id: finalFamilyId,
       role: "admin",
     });
 
-    const response = sendTokenResponse(res, newUser);
+    const response = await sendTokenResponse(res, newUser);
     return res.status(201).json(response);
   } catch (error) {
     next(error);
@@ -104,23 +113,21 @@ async function add_signUpWithGoogle(req, res, next) {
     }
 
     const existingUser = await findUserByEmail(req.user.email);
-    if (existingUser) {
-      throw new AppError("User with this email already exists", 409);
-    }
+    if (existingUser) throw new AppError("User with this email already exists", 409);
 
     const lastName = req.user.name.split(" ")[1] || req.user.name;
-    const family_id = await createFamily(lastName);
+    const familyId = await createFamily(lastName);
 
     const newUser = await createUser({
       name: req.user.name,
       email: req.user.email,
       password: "",
-      family_id,
+      family_id: familyId,
       role: "admin",
       provider: "google",
     });
 
-    const response = sendTokenResponse(res, newUser);
+    const response = await sendTokenResponse(res, newUser);
     return res.status(201).json(response);
   } catch (error) {
     next(error);
@@ -142,7 +149,7 @@ async function getUserByuserNamePassword_Login(req, res, next) {
       throw new AppError("Incorrect password", 401);
     }
 
-    const response = sendTokenResponse(res, user);
+    const response = await sendTokenResponse(res, user);
     return res.status(200).json(response);
   } catch (error) {
     next(error);
@@ -158,7 +165,7 @@ async function getUserByGoogle_Login(req, res, next) {
       throw new AppError("This email is registered with another method", 400);
     }
 
-    const response = sendTokenResponse(res, user);
+    const response = await sendTokenResponse(res, user);
     return res.status(200).json(response);
   } catch (error) {
     next(error);

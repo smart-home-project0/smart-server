@@ -20,6 +20,8 @@ const DEVICE_LIST_AND_FAMILY_NAME = "/devices";
 const GOOGLE_SIGNUP = "/signup/google";
 const GOOGLE_LOGIN = "/login/google";
 const GOOGLE_CALLBACK = "/auth/callback"; 
+const REFRESH_TOKEN = "/refresh-token";
+const LOGOUT = "/logout";
 
 const router = express.Router();
 
@@ -87,6 +89,8 @@ router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
             next(error);
         }
     });
+router.route(REFRESH_TOKEN).post(user.refreshAccessToken);
+router.route(LOGOUT).post(authenticateToken, user.logoutUser);
 
 // Device routes: using the functions imported from device.js
 
