@@ -65,13 +65,9 @@ async function toggle(req, res, next) {
       throw new AppError("Invalid status value. Must be boolean true or false.", 400);
     }
     // שליחת בקשה לשנות את הסטטוס ב-Tuya
-    // console.time("tuyaToggle");
-    await toggleDevice(deviceId, status);
-    // console.timeEnd("tuyaToggle");   
+    await toggleDevice(deviceId, status);  
     // עדכון הסטטוס במונגו
-    // console.time("mongoUpdate");
     const updateStatusInMongo = await updateDeviceStatus(deviceId, status);
-    // console.timeEnd("mongoUpdate");
     const deviceStatus = status ? "ON" : "OFF";
     //בדיקה אם הסטטוס במונגו שונה 
     if (updateStatusInMongo === 0)
