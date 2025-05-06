@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 
 // **** Import necessary dependencies ****
 import { getStatusByDeviceId, toggleDevice } from "./lib/storage/tuya.js";
-import { findDevicesAndFamilyNameByfamily_id } from "./lib/storage/mongo.js";
+import { findDevicesAndFamilyNameByfamily_id, updateDeviceStatus } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
 
 // **** Load JSON Schemas using Ajv ****
@@ -44,11 +44,10 @@ async function getDeviceListAndFamilyNameByfamily_id(req, res, next) {
       throw new AppError("Family ID is required.", 400);
     }
     const response = await findDevicesAndFamilyNameByfamily_id(family_id);
-    console.log("response: ", response);
     if (response == null) {
       return res.status(404).json({ message: "Family not found" });
     }
-    return res.status(200).json({message:"Devices and family name fetched successfully", response}) ;
+    return res.status(200).json({ message: "Devices and family name fetched successfully", response });
   } catch (error) {
     next(error);
   }
@@ -66,20 +65,19 @@ async function toggle(req, res, next) {
       throw new AppError("Invalid status value. Must be boolean true or false.", 400);
     }
     // שליחת בקשה לשנות את הסטטוס ב-Tuya
-    await toggleDevice(deviceId, status);
-    // המתן 2 שניות כדי לאפשר ל-Tuya לעדכן את הסטטוס
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    // קבלת הסטטוס המעודכן מ-Tuya
-    const updatedStatus = await getStatusByDeviceId(deviceId);
-    const deviceStatus = updatedStatus ? "ON" : "OFF";
-
-    res.status(200).json({ message:`Device ${deviceId} status changed successfully.`, status: deviceStatus });
+    await toggleDevice(deviceId, status);  
+    // עדכון הסטטוס במונגו
+    const updateStatusInMongo = await updateDeviceStatus(deviceId, status);
+    const deviceStatus = status ? "ON" : "OFF";
+    //בדיקה אם הסטטוס במונגו שונה 
+    if (updateStatusInMongo === 0)
+      res.status(200).json({ Message: `No update was needed. Device status ${deviceId} has not changed.`, status: deviceStatus });
+    res.status(200).json({ message: `Device ${deviceId} status changed successfully.`, status: deviceStatus });
   } catch (error) {
     console.error("Error toggling device:", error);
     next(error);
   }
 }
-
 //     method: 'GET',
 async function getStatus(req, res, next) {
   const deviceId = req.params.deviceId;
@@ -89,7 +87,7 @@ async function getStatus(req, res, next) {
     }
     const status = await getStatusByDeviceId(deviceId);
     const deviceStatus = status ? "ON" : "OFF";
-    res.status(200).json({message: `Device status retrieved successfully.`, status: deviceStatus });
+    res.status(200).json({ message: `Device status retrieved successfully.`, status: deviceStatus });
   } catch (error) {
     console.error("Error getting device status:", error);
     next(error);

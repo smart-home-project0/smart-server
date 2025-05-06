@@ -99,7 +99,7 @@ async function findDevicesAndFamilyNameByfamily_id(family_id) {
         .collection(FAMILIES_COLLECTION)
         .findOne({ _id: new ObjectId(family_id) });
     if (!family) return null;
-    const familyDevices = family.devices.map((id) => new ObjectId(id));
+    const familyDevices = family.devices.map((id) => id);
     const devices = await dbHandle
         .collection(DEVICES_COLLECTION)
         .find({ _id: { $in: familyDevices } })
@@ -123,33 +123,40 @@ async function findDevicesAndFamilyNameByfamily_id(family_id) {
 // ===================== devices functions =====================
 
 async function updateDeviceStatus(deviceId, status) {
-    const familyCollection = dbHandle.collection(FAMILIES_COLLECTION);
-    const mongoStatus = status ? "ONLINE" : "OFFLINE";
+    const deviceCollection = dbHandle.collection(DEVICES_COLLECTION);
+    const mongoStatus = status ? "ON" : "OFF";
+
     // עדכון סטטוס המכשיר בתוך משפחת המשתמש
-    const result = await familyCollection.updateOne(
-        { "devices._id": deviceId },
-        { $set: { "devices.$.status": mongoStatus } }
+    const device = await deviceCollection.findOne({ _id: deviceId });
+    if (!device) {
+        throw new AppError(`Device with ID ${deviceId} not found.`, 400);
+    }
+    // אם הסטטוס כבר תואם, אין צורך בעדכון
+    if (device.status === mongoStatus) {
+        console.log(`Device ${deviceId} already has status ${mongoStatus}. No update needed.`);
+        return 0; // מחזיר 0 אם הסטטוס כבר תואם
+    }
+    // עדכון סטטוס המכשיר
+    const result = await deviceCollection.updateOne(
+        { _id: deviceId },
+        { $set: { status: mongoStatus } }
     );
     if (result.modifiedCount === 0) {
-        throw new AppError(`Device with ID ${deviceId} not found in any family.`, 400);
+        console.log(`result.modifiedCount: ${result.modifiedCount}`);
+        throw new AppError(`Device with ID ${deviceId} not found or status not updated.`, 400);
     }
     console.log(`Device ${deviceId} status updated to ${mongoStatus}.`);
-    return result.modifiedCount
+    return result.modifiedCount;
 }
-/* מיועד למחיקה בהמשך */
-async function printDeviceStatus(deviceId) {
-    const family = await dbHandle.collection(FAMILIES_COLLECTION).findOne({ "devices._id": { $regex: deviceId.trim() } });
-    console.log(JSON.stringify(family, null, 2));
-}
+
 export {
-  connectToMongo,
-  findUserByEmail,
-  createFamily,
-  createUser,
-  findUserById,
-  updateUser,
-  findDevicesAndFamilyNameByfamily_id,
-  updateDeviceStatus,
-  printDeviceStatus
+    connectToMongo,
+    findUserByEmail,
+    createFamily,
+    createUser,
+    findUserById,
+    updateUser,
+    findDevicesAndFamilyNameByfamily_id,
+    updateDeviceStatus
 };
 
