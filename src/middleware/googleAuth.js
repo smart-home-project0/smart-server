@@ -14,8 +14,8 @@ async function verifyGoogleToken(req, res, next) {
       req.user = payload;
       next();
     } catch (error) {
-      console.error('Google token verification error:', error); // הוסף את השורה הזו
-      return res.status(401).json({ message: "Invalid Google token", error: error.message }); //הוסף את error.message
+      console.error('Google token verification error:', error); 
+      return res.status(401).json({ message: "Invalid Google token", error: error.message }); 
     }
   }
 export default verifyGoogleToken;

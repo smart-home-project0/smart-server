@@ -17,7 +17,7 @@ export function generateAccessToken(user) {
   };
 
   return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m", 
+    expiresIn: "2m", 
   });
 }
 //RefreshToken

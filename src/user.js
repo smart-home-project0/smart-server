@@ -65,7 +65,7 @@ async function sendTokenResponse(res, user) {
   });
 
   return {
-    token: accessToken,
+    accessToken: accessToken,
     user: {
       _id: user._id,
       name: user.name,
