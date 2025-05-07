@@ -9,6 +9,8 @@ import { connectToMongo } from "./src/lib/storage/mongo.js";
 import router from "./src/lib/router.js";  // General routes including user routes
 import errorHandler from "./src/lib/errorHandler.js";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+
 
 // *************** Application Initialization **************//
 dotenv.config();
@@ -27,7 +29,7 @@ app.use(cors({
 }));
 app.use(morgan("dev"));
 
-
+app.use(cookieParser());
 // Use the router which now contains all endpoints
 app.use("/", router);
 
