@@ -1,22 +1,26 @@
-// *************** Require External Modules ****************//import bcrypt from "bcrypt";
+// *************** Require External Modules ****************//
+import bcrypt from "bcrypt";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import bcrypt from "bcrypt";
 
 // *************** Require Internal Modules ****************//
-import generateToken from "./lib/utils/generateToken.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "./lib/utils/generateToken.js";
 import {
   findUserByEmail,
   createFamily,
   createUser,
   findUserById,
   updateUser,
+  createUserSession,
+  findSessionByToken
 } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
-
 
 // **** Load JSON Schemas using Ajv ****
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -32,42 +36,65 @@ fs.readdirSync(schemasDir).forEach((file) => {
   ajv.addSchema(schema, schema.$id);
 });
 
-// Function to validate data against a JSON schema
 const validateSchema = (schemaId, data) => {
   const validate = ajv.getSchema(schemaId);
   if (!validate) {
     throw new AppError(`Schema ${schemaId} not found`);
-  }
-  const isValid = validate(data);
+  }  const isValid = validate(data);
   return { isValid, errors: validate.errors };
 };
 
-
-// Function to check if the provided password matches the hashed password
 async function isPasswordValid(inputPassword, hashedPassword) {
   return await bcrypt.compare(inputPassword, hashedPassword);
 }
 
+/**
+ * Issue tokens and persist refresh session
+ */
+async function sendTokenResponse(res, user) {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+  await createUserSession(user._id, refreshToken, expiresAt);
 
-// User signup
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return {
+    accessToken: accessToken,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      family_id: user.family_id,
+      role: user.role,
+      provider: user.provider || "local",
+    },
+  };
+}
+
 async function add_signUp(req, res, next) {
   try {
     const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
     if (!isValid) {
       throw new AppError(`Invalid input ${errors}`, 400);
     }
-
     const { name, email, password, family_id } = req.body;
     const existingUser = await findUserByEmail(email);
-    if (existingUser) {
+    if (existingUser){
       throw new AppError("User with this email already exists", 400);
     }
+      
 
-    let finalfamily_id = family_id;
-    if (!finalfamily_id) {
+    let finalFamilyId = family_id;
+    if (!finalFamilyId) {
       const lastName = name.split(" ")[1] || name;
-      finalfamily_id = await createFamily(lastName);
+      finalFamilyId = await createFamily(lastName);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -75,144 +102,92 @@ async function add_signUp(req, res, next) {
       name,
       email,
       password: hashedPassword,
-      family_id: finalfamily_id,
+      family_id: finalFamilyId,
       role: "admin",
     });
 
-    const response = {
-      token: generateToken(newUser),
-      user: {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        family_id: newUser.family_id,
-        role: newUser.role,
-      }
-    };
+    const response = await sendTokenResponse(res, newUser);
     return res.status(201).json(response);
   } catch (error) {
     next(error);
   }
 }
 
-
-
-// Google Sign-Up
-async function add_signUpWithGoogle(req, res) {
+async function add_signUpWithGoogle(req, res, next) {
   try {
-    console.log('Request headers:', req.headers);
-    console.log('Google token payload:', req.user);
-
     if (!req.user || !req.user.email || !req.user.name) {
       throw new AppError("Invalid Google token", 400);
     }
 
     const existingUser = await findUserByEmail(req.user.email);
-
-    if (existingUser) {
+    if (existingUser){
       throw new AppError("User with this email already exists", 409);
     }
-
     const lastName = req.user.name.split(" ")[1] || req.user.name;
-    const family_id = await createFamily(lastName);
+    const familyId = await createFamily(lastName);
 
     const newUser = await createUser({
       name: req.user.name,
       email: req.user.email,
       password: "",
-      family_id,
+      family_id: familyId,
       role: "admin",
       provider: "google",
     });
-    console.log("New Google User Created:", newUser); // <<< הוספתי פה!
-    return res.status(201).json({
-      success: true,
-      user: {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        family_id: newUser.family_id,
-        role: newUser.role,
-        provider: newUser.provider
-      },
-      message: "Google signup successful",
-    });
 
-  } catch (error) {
-    console.error("Google signup error:", error);
-    throw new AppError(`Google signup failed ${error.message}`, 500);
-  }
-}
-
-// User Login
-async function getUserByuserNamePassword_Login(req, res, next) {
-  try {
-    //console.log("req", req.body);
-    const { isValid, errors } = validateSchema("user_loginSchema", req.body);
-    if (!isValid) {
-      throw new AppError(`Invalid input ${errors}`, 400);
-    }
-    const { email, password } = req.body;
-    if (!email || !password) {
-      throw new AppError("Email and password are required", 401);
-    }
-
-    const user = await findUserByEmail(email);
-    if (!user) {
-      throw new AppError("Email not found", 401);
-    }
-
-    if (!(await isPasswordValid(password, user.password))) {
-      throw new AppError("Incorrect password", 401);
-    }
-    //console.log("user", user);
-    user.token = generateToken(user);
-    const response = {
-      message: "Login successful",
-      user,
-    };
-    return res.json(response);
+    const response = await sendTokenResponse(res, newUser);
+    return res.status(201).json(response);
   } catch (error) {
     next(error);
   }
 }
-// Google Login
-async function getUserByGoogle_Login(req, res, next) {
+
+async function getUserByuserNamePassword_Login(req, res, next) {
   try {
-    const { email, googleId } = req.user;
+    const { isValid, errors } = validateSchema("user_loginSchema", req.body);
+    if (!isValid) throw new AppError(`Invalid input ${errors}`, 400);
+
+    const { email, password } = req.body;
+    if (!email || !password)
+      throw new AppError("Email and password are required", 401);
+
     const user = await findUserByEmail(email);
-    console.log(user);  // בדוק אם יש כאן family_id
-    if (!user) {
-      throw new AppError("User not found. Please sign up first", 404);
+    if (!user) throw new AppError(`Email not found: ${email}`, 401);
+
+    if (!(await isPasswordValid(password, user.password))) {
+      throw new AppError("Incorrect password", 401);
     }
 
+    const response = await sendTokenResponse(res, user);
+    return res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getUserByGoogle_Login(req, res, next) {
+  try {
+    const { email } = req.user;
+    const user = await findUserByEmail(email);
+    if (!user) throw new AppError("User not found. Please sign up first", 404);
     if (user.provider !== "google") {
       throw new AppError("This email is registered with another method", 400);
     }
 
-    const token = generateToken(user);
-
-    return res.status(200).json({
-      message: "Google Login successful",
-      token,
-      user,
-    });
+    const response = await sendTokenResponse(res, user);
+    return res.status(200).json(response);
   } catch (error) {
-    console.error("Google login error:", error);
-    throw new AppError(`Google login failed ${error?.message}`, 500);
+    next(error);
   }
 }
 
-// Change Password
 async function changePassword(req, res, next) {
   try {
     const { isValid, errors } = validateSchema(
       "user_updatePasswordSchema",
       req.body
     );
-    if (!isValid) {
-      throw new AppError(`Invalid input ${errors}`, 400);
-    }
+    if (!isValid) throw new AppError(`Invalid input ${errors}`, 400);
 
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) {
@@ -227,13 +202,50 @@ async function changePassword(req, res, next) {
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await updateUser(user._id, { password: hashedNewPassword });
 
-    const response = { message: "Password updated successfully" };
-    return res.json(response);
+    return res.json({ message: "Password updated successfully" });
   } catch (error) {
     next(error);
   }
 }
 
-// Export all functions in one line
-export { add_signUp, getUserByuserNamePassword_Login, changePassword, add_signUpWithGoogle, getUserByGoogle_Login };
+async function refreshAccessToken(req, res, next) {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) throw new AppError("No refresh token provided", 401);
 
+    const session = await findSessionByToken(token);
+    if (!session || session.expiresAt < new Date()) {
+      throw new AppError("Invalid or expired refresh token", 403);
+    }
+
+    const user = await findUserById(session.userId);
+    if (!user) throw new AppError(`User not found (ID: ${session.userId})`, 404);
+
+    const newAccessToken = generateAccessToken(user);
+    res.json({ token: newAccessToken });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// async function logoutUser(req, res, next) {
+//   try {
+//     const refreshToken = req.cookies.refreshToken;
+//     if (refreshToken) {
+//       await deleteSessionByToken(refreshToken);
+//       res.clearCookie("refreshToken");
+//     }
+//     res.json({ message: "Logged out successfully" });
+//   } catch (error) {
+//     next(error);
+//   }
+// }
+
+export {
+  add_signUp,
+  getUserByuserNamePassword_Login,
+  changePassword,
+  add_signUpWithGoogle,
+  getUserByGoogle_Login,
+  refreshAccessToken,
+};
