@@ -17,7 +17,7 @@ export function generateAccessToken(user) {
   };
 
   return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "2m", 
+    expiresIn: "20m", 
   });
 }
 //RefreshToken
@@ -25,6 +25,7 @@ export function generateRefreshToken(user) {
   if (!process.env.REFRESH_TOKEN_SECRET) {
     throw new AppError("REFRESH_TOKEN_SECRET is not defined", 500);
   }
+  console.log(`Generating refresh token for user: ${user.name}, ID: ${user._id}`);
 
   const payload = {
     userId: user._id,

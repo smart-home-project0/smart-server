@@ -9,7 +9,10 @@ function authenticateToken(req, res, next) {
   }
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    if (err) return next(new AppError("Invalid or expired access token", 403));
+    if (err) {
+      return next(new AppError("Invalid or expired access token", 403));
+    }
+
     req.user = user;
     next();
   });

@@ -38,8 +38,9 @@ fs.readdirSync(schemasDir).forEach((file) => {
 
 const validateSchema = (schemaId, data) => {
   const validate = ajv.getSchema(schemaId);
-  if (!validate) throw new AppError(`Schema ${schemaId} not found`);
-  const isValid = validate(data);
+  if (!validate) {
+    throw new AppError(`Schema ${schemaId} not found`);
+  }  const isValid = validate(data);
   return { isValid, errors: validate.errors };
 };
 
@@ -80,12 +81,15 @@ async function sendTokenResponse(res, user) {
 async function add_signUp(req, res, next) {
   try {
     const { isValid, errors } = validateSchema("user_signUpSchema", req.body);
-    if (!isValid) throw new AppError(`Invalid input ${errors}`, 400);
-
+    if (!isValid) {
+      throw new AppError(`Invalid input ${errors}`, 400);
+    }
     const { name, email, password, family_id } = req.body;
     const existingUser = await findUserByEmail(email);
-    if (existingUser)
+    if (existingUser){
       throw new AppError("User with this email already exists", 400);
+    }
+      
 
     let finalFamilyId = family_id;
     if (!finalFamilyId) {
@@ -116,9 +120,9 @@ async function add_signUpWithGoogle(req, res, next) {
     }
 
     const existingUser = await findUserByEmail(req.user.email);
-    if (existingUser)
+    if (existingUser){
       throw new AppError("User with this email already exists", 409);
-
+    }
     const lastName = req.user.name.split(" ")[1] || req.user.name;
     const familyId = await createFamily(lastName);
 
@@ -148,7 +152,7 @@ async function getUserByuserNamePassword_Login(req, res, next) {
       throw new AppError("Email and password are required", 401);
 
     const user = await findUserByEmail(email);
-    if (!user) throw new AppError("Email not found", 401);
+    if (!user) throw new AppError(`Email not found: ${email}`, 401);
 
     if (!(await isPasswordValid(password, user.password))) {
       throw new AppError("Incorrect password", 401);
@@ -215,7 +219,7 @@ async function refreshAccessToken(req, res, next) {
     }
 
     const user = await findUserById(session.userId);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError(`User not found (ID: ${session.userId})`, 404);
 
     const newAccessToken = generateAccessToken(user);
     res.json({ token: newAccessToken });
