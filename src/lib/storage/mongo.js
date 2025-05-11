@@ -122,8 +122,8 @@ async function deleteAllUserSessions(userId) {
     await dbHandle
     .collection(SESSIONS_COLLECTION)
     .deleteMany({ userId: new ObjectId(userId) });
-}
 
+ 
 //פונקציה לשליפת שם משפחה לפי family_id
 //לשים לב שזה לא מיוצא
 // async function findFamilyNameByfamily_id(family_id) {
@@ -146,14 +146,20 @@ async function createFamily(name) {
     return result.insertedId;
 }
 
-async function findDevicesAndFamilyNameByfamily_id(family_id) {
+ async function findDevicesAndFamilyNameByfamily_id(family_id) {
     const family = await dbHandle
         .collection(FAMILIES_COLLECTION)
         .findOne({ _id: new ObjectId(family_id) });
-
     if (!family) return null;
-    return { devices: family.devices, familyName: family.name };
+    const familyDevices = family.devices.map((id) => id);
+    const devices = await dbHandle
+        .collection(DEVICES_COLLECTION)
+        .find({ _id: { $in: familyDevices } })
+        .toArray();
+    const response = { familyName: family.name, devices };
+    return response;
 }
+
 
 async function updateDeviceStatus(deviceId, status) {
     const mongoStatus = status ? "ONLINE" : "OFFLINE";
@@ -162,9 +168,27 @@ async function updateDeviceStatus(deviceId, status) {
     .updateOne(
         { "devices._id": deviceId },
         { $set: { "devices.$.status": mongoStatus } }
+    const deviceCollection = dbHandle.collection(DEVICES_COLLECTION);
+    const mongoStatus = status ? "ON" : "OFF";
+
+    // עדכון סטטוס המכשיר בתוך משפחת המשתמש
+    const device = await deviceCollection.findOne({ _id: deviceId });
+    if (!device) {
+        throw new AppError(`Device with ID ${deviceId} not found.`, 400);
+    }
+    // אם הסטטוס כבר תואם, אין צורך בעדכון
+    if (device.status === mongoStatus) {
+        console.log(`Device ${deviceId} already has status ${mongoStatus}. No update needed.`);
+        return 0; // מחזיר 0 אם הסטטוס כבר תואם
+    }
+    // עדכון סטטוס המכשיר
+    const result = await deviceCollection.updateOne(
+        { _id: deviceId },
+        { $set: { status: mongoStatus } }
     );
     if (result.modifiedCount === 0) {
-        throw new AppError(`Device with ID ${deviceId} not found in any family.`, 400);
+        console.log(`result.modifiedCount: ${result.modifiedCount}`);
+        throw new AppError(`Device with ID ${deviceId} not found or status not updated.`, 400);
     }
     console.log(`Device ${deviceId} status updated to ${mongoStatus}.`);
     return result.modifiedCount;
@@ -190,4 +214,5 @@ export {
     findSessionByToken,
     deleteSessionByToken,
     deleteAllUserSessions,
+
 };

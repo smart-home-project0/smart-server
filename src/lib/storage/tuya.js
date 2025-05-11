@@ -52,7 +52,7 @@ async function toggleDevice(deviceId, status) {
     }
     console.log("=========== change status ==============");
     console.log(res);
-    return res; 
+    return res;
 
 }
 
