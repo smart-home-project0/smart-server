@@ -123,7 +123,7 @@ async function deleteAllUserSessions(userId) {
     .collection(SESSIONS_COLLECTION)
     .deleteMany({ userId: new ObjectId(userId) });
 
- 
+ }
 //פונקציה לשליפת שם משפחה לפי family_id
 //לשים לב שזה לא מיוצא
 // async function findFamilyNameByfamily_id(family_id) {
@@ -162,12 +162,6 @@ async function createFamily(name) {
 
 
 async function updateDeviceStatus(deviceId, status) {
-    const mongoStatus = status ? "ONLINE" : "OFFLINE";
-    const result = await dbHandle
-    .collection(FAMILIES_COLLECTION)
-    .updateOne(
-        { "devices._id": deviceId },
-        { $set: { "devices.$.status": mongoStatus } }
     const deviceCollection = dbHandle.collection(DEVICES_COLLECTION);
     const mongoStatus = status ? "ON" : "OFF";
 
@@ -193,6 +187,7 @@ async function updateDeviceStatus(deviceId, status) {
     console.log(`Device ${deviceId} status updated to ${mongoStatus}.`);
     return result.modifiedCount;
 }
+
 /* מיועד למחיקה בהמשך */
 async function printDeviceStatus(deviceId) {
     const family = await dbHandle.collection(FAMILIES_COLLECTION).findOne({ "devices._id": { $regex: deviceId.trim() } });
