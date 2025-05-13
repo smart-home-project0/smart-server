@@ -227,19 +227,25 @@ async function refreshAccessToken(req, res, next) {
     next(error);
   }
 }
+async function logoutUser(req, res, next) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
 
-// async function logoutUser(req, res, next) {
-//   try {
-//     const refreshToken = req.cookies.refreshToken;
-//     if (refreshToken) {
-//       await deleteSessionByToken(refreshToken);
-//       res.clearCookie("refreshToken");
-//     }
-//     res.json({ message: "Logged out successfully" });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
+    if (refreshToken) {
+      await deleteSessionByToken(refreshToken); // מוחק מה-DB
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+      });
+    }
+
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 export {
   add_signUp,
@@ -247,5 +253,6 @@ export {
   changePassword,
   add_signUpWithGoogle,
   getUserByGoogle_Login,
+  logoutUser,
   refreshAccessToken,
 };

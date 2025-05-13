@@ -166,3 +166,5 @@
 {"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
 {"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
 {"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] User not found. Please sign up first"}
+{"level":"error","message":"[ERROR] User not found. Please sign up first"}
