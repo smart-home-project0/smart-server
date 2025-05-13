@@ -2,6 +2,7 @@
 import express from 'express';
 import verifyGoogleToken from "../middleware/googleAuth.js";
 import { OAuth2Client } from 'google-auth-library';
+import config from "config"
 
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
@@ -64,13 +65,13 @@ router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
                 return res.status(400).json({ message: "Authorization code is missing" });
             }
             // Exchange the code for tokens using OAuth2Client
-            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            const client = new OAuth2Client(config.get("google.clientId"));
             const { tokens } = await client.getToken(code);
 
             // Verify and decode the ID token
             const ticket = await client.verifyIdToken({
                 idToken: tokens.id_token,
-                audience: process.env.GOOGLE_CLIENT_ID,
+                audience: config.get("google.clientId"),
             });
             const payload = ticket.getPayload();
 

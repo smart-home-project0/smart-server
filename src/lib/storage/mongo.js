@@ -7,34 +7,35 @@ import AppError from '../appError.js';
 
 let dbHandle, mongoConn;
 
-const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
-const FAMILIES_COLLECTION = config.mongo.familiesCollectionName || "families";
-const DEVICES_COLLECTION = config.mongo.devicesCollectionName || "devices";
+const USERS_COLLECTION = config.get("mongo.usersCollectionName") || "users";
+const FAMILIES_COLLECTION = config.get("mongo.familiesCollectionName") || "families";
+const DEVICES_COLLECTION = config.get("mongo.devicesCollectionName") || "devices";
 
 function getMongoConnectionString() {
     let connectionString = "";
 
-    if (config.mongo.uri_prefix) {
-        connectionString += `${config.mongo.uri_prefix}://`;
+    if (config.get("mongo.uri_prefix")) {
+        connectionString += `${config.get("mongo.uri_prefix")}://`;
     }
-    if (config.mongo.username && config.mongo.password) {
-        const encodedPassword = encodeURIComponent(config.mongo.password);
-        connectionString += `${config.mongo.username}:${encodedPassword}@`;
+    if (config.get("mongo.username") && config.get("mongo.password")) {
+        const encodedPassword = encodeURIComponent(config.get("mongo.password"));
+        connectionString += `${config.get("mongo.username")}:${encodedPassword}@`;
     }
-    if (config.mongo.cluster_url) {
-        connectionString += `${config.mongo.cluster_url}`;
+    if (config.get("mongo.cluster_url")) {
+        connectionString += `${config.get("mongo.cluster_url")}`;
     }
-    if (config.mongo.mongoDBName) {
-        connectionString += `/${config.mongo.mongoDBName}`;
+    if (config.get("mongo.mongoDBName")) {
+        connectionString += `/${config.get("mongo.mongoDBName")}`;
     }
     const queryParams = [];
-    if (config.mongo.connectTimeoutMS) {
-        queryParams.push(`connectTimeoutMS=${config.mongo.connectTimeoutMS}`);
+    if (config.get("mongo.connectTimeoutMS")) {
+        queryParams.push(`connectTimeoutMS=${config.get("mongo.connectTimeoutMS")}`);
     }
     if (queryParams.length > 0) {
         connectionString += `?${queryParams.join("&")}`;
     }
     return connectionString;
+
 }
 
 async function connectToMongo(logger, reconnectIntervalInMs = 5000) {

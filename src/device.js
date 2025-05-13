@@ -6,9 +6,10 @@ import addFormats from "ajv-formats";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import axios from "axios";
+import config from "config";
 
 // **** Import necessary dependencies ****
-import { getStatusByDeviceId, toggleDevice } from "./lib/storage/tuya.js";
 import { findDevicesAndFamilyNameByfamily_id, updateDeviceStatus } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
 
@@ -53,6 +54,9 @@ async function getDeviceListAndFamilyNameByfamily_id(req, res, next) {
   }
 }
 
+const  tuyaServerBaseUrl= config.get("tuya.serverBaseUrl");
+
+
 //     method: 'PUT',
 async function toggle(req, res, next) {
   const deviceId = req.params.deviceId;
@@ -64,8 +68,10 @@ async function toggle(req, res, next) {
     if (typeof status !== "boolean") {
       throw new AppError("Invalid status value. Must be boolean true or false.", 400);
     }
-    // שליחת בקשה לשנות את הסטטוס ב-Tuya
-    await toggleDevice(deviceId, status);  
+    //פנייה לשרת של טויה
+    const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceId}`, { status: status });
+    if (response.data.result != true)
+      throw new AppError("Error with tuya server", 400);
     // עדכון הסטטוס במונגו
     const updateStatusInMongo = await updateDeviceStatus(deviceId, status);
     const deviceStatus = status ? "ON" : "OFF";
@@ -85,14 +91,17 @@ async function getStatus(req, res, next) {
     if (!deviceId) {
       throw new AppError("Device ID is required.", 400);
     }
-    const status = await getStatusByDeviceId(deviceId);
-    const deviceStatus = status ? "ON" : "OFF";
-    res.status(200).json({ message: `Device status retrieved successfully.`, status: deviceStatus });
+    const response = await axios.get(`${tuyaServerBaseUrl}/device/status/${deviceId}`);
+    if (response.data.result != true)
+      throw new AppError("Error with tuya server", 400);
+    const status = response.data.status ? "ON" : "OFF";
+    res.status(200).json({ message: `Device status retrieved successfully.`, status: status });
   } catch (error) {
     console.error("Error getting device status:", error);
     next(error);
   }
 }
+
 
 export {
   getDeviceListAndFamilyNameByfamily_id,

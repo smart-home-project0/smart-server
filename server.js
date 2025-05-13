@@ -8,12 +8,11 @@ import config from "config";
 import { connectToMongo } from "./src/lib/storage/mongo.js";  
 import router from "./src/lib/router.js";  // General routes including user routes
 import errorHandler from "./src/lib/errorHandler.js";
-import dotenv from "dotenv";
 
 // *************** Application Initialization **************//
-dotenv.config();
 const app = express();
-const port = config.has("port") ? config.get("port") : 3000;
+const port = config.get("port")||3005;
+
 let mongoConnected = false;
 
 // *************** Middleware Setup **************//
@@ -21,7 +20,7 @@ let mongoConnected = false;
 app.use(express.json());
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // קרא את כתובת ה-Frontend מהמשתנה בסביבה
+  origin: config.get("frontendUrl"), // קרא את כתובת ה-Frontend מהמשתנה בסביבה
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));

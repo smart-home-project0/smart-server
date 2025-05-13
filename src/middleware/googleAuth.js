@@ -1,7 +1,7 @@
 import { OAuth2Client } from 'google-auth-library';
 import config from 'config';
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_ID = config.get("google.clientId");
 const client = new OAuth2Client(CLIENT_ID);
 
 // Function to verify the Google token

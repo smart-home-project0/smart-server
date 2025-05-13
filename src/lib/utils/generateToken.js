@@ -1,11 +1,12 @@
 // *************** Require External Modules ****************//
 import jwt from "jsonwebtoken";
+import config from 'config'
 
 // *************** Require Internal Modules ****************//
 import AppError from "../appError.js";
 
 export default function generateToken(user) {
-    if (!process.env.SECRET_KEY) {
+    if (!config.get("secretKey")) {
         throw new AppError("SECRET_KEY is not defined in environment variables",500);
     }
 
@@ -15,5 +16,5 @@ export default function generateToken(user) {
         roleId: user.role_id, 
     };
 
-    return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "1h" });
+    return jwt.sign(payload, config.get("secretKey"), { expiresIn: "1h" });
 }
