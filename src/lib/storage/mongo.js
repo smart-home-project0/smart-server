@@ -123,30 +123,36 @@ async function findDevicesAndFamilyNameByfamily_id(family_id) {
 
 // ===================== devices functions =====================
 
-async function updateDeviceStatus(deviceId, status) {
+async function findDeviceNumberId(device_id) {
+    const device = await dbHandle.collection(DEVICES_COLLECTION).findOne({ _id: device_id });
+    const deviceNumberId = device?.deviceNumberId;
+    return deviceNumberId;
+}
+
+// פונקציה לעדכון סטטוס המכשיר
+async function updateDeviceStatus(device_id, status) {
     const deviceCollection = dbHandle.collection(DEVICES_COLLECTION);
     const mongoStatus = status ? "ON" : "OFF";
-
     // עדכון סטטוס המכשיר בתוך משפחת המשתמש
-    const device = await deviceCollection.findOne({ _id: deviceId });
+    const device = await deviceCollection.findOne({ _id: device_id });
     if (!device) {
-        throw new AppError(`Device with ID ${deviceId} not found.`, 400);
+        throw new AppError(`Device with ID ${device_id} not found.`, 400);
     }
     // אם הסטטוס כבר תואם, אין צורך בעדכון
     if (device.status === mongoStatus) {
-        console.log(`Device ${deviceId} already has status ${mongoStatus}. No update needed.`);
+        console.log(`Device ${device_id} already has status ${mongoStatus}. No update needed.`);
         return 0; // מחזיר 0 אם הסטטוס כבר תואם
     }
     // עדכון סטטוס המכשיר
     const result = await deviceCollection.updateOne(
-        { _id: deviceId },
+        { _id: device_id },
         { $set: { status: mongoStatus } }
     );
     if (result.modifiedCount === 0) {
         console.log(`result.modifiedCount: ${result.modifiedCount}`);
-        throw new AppError(`Device with ID ${deviceId} not found or status not updated.`, 400);
+        throw new AppError(`Device with ID ${device_id} not found or status not updated.`, 400);
     }
-    console.log(`Device ${deviceId} status updated to ${mongoStatus}.`);
+    console.log(`Device ${device_id} status updated to ${mongoStatus}.`);
     return result.modifiedCount;
 }
 
@@ -158,6 +164,7 @@ export {
     findUserById,
     updateUser,
     findDevicesAndFamilyNameByfamily_id,
+    findDeviceNumberId,
     updateDeviceStatus
 };
 
