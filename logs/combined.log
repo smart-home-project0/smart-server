@@ -66,3 +66,4 @@
 {"level":"error","message":"[ERROR] Error toggling device: permission deny"}
 {"level":"error","message":"[ERROR] Error toggling device: permission deny"}
 
+{"level":"error","message":"[ERROR] Request failed with status code 400"}

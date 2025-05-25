@@ -13,7 +13,6 @@ const DEVICES_COLLECTION = config.get("mongo.devicesCollectionName") || "devices
 
 function getMongoConnectionString() {
     let connectionString = "";
-
     if (config.get("mongo.uri_prefix")) {
         connectionString += `${config.get("mongo.uri_prefix")}://`;
     }
