@@ -1,0 +1,25 @@
+{
+    "$id": "addTimerSchema",
+    "title": "Add Timer",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "deviceId": {
+        "type": "string"
+      },
+      "time": {
+        "type": "string",
+        "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+      },
+      "action": {
+        "type": "string",
+        "enum": ["ON", "OFF"]
+      },
+      "daysOfWeek": {
+        "type": "string",
+        "pattern": "^[01]{7}$"
+      }
+    },
+    "required": ["deviceId", "time", "action", "daysOfWeek"]
+  }
+  

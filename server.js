@@ -5,7 +5,7 @@ import morgan from "morgan";
 import config from "config";
 
 // *************** Require Internal Modules ****************//
-import { connectToMongo } from "./src/lib/storage/mongo.js";  
+import { connectToMongo } from "./src/lib/storage/mongo.js";
 import router from "./src/lib/router.js";  // General routes including user routes
 import errorHandler from "./src/lib/errorHandler.js";
 import dotenv from "dotenv";
@@ -23,9 +23,9 @@ let mongoConnected = false;
 app.use(express.json());
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // קרא את כתובת ה-Frontend מהמשתנה בסביבה
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
+    origin: process.env.FRONTEND_URL, // קרא את כתובת ה-Frontend מהמשתנה בסביבה
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
 }));
 app.use(morgan("dev"));
 

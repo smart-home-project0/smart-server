@@ -11,6 +11,7 @@ const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
 const FAMILIES_COLLECTION = config.mongo.familiesCollectionName || "families";
 const DEVICES_COLLECTION = config.mongo.devicesCollectionName || "devices";
 const SESSIONS_COLLECTION = config.mongo.sessionsCollectionName || "user_sessions";
+const TIMERS_COLLECTION = config.mongo.timersCollectionName || "timers";
 
 function getMongoConnectionString() {
     let connectionString = "";
@@ -54,6 +55,16 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
         mongoConn = await MongoClient.connect(url, options);
         dbHandle = mongoConn.db(config.mongo.mongoDBName);
         logger && logger.info("Connected to MongoDB successfully");
+
+        // ========== יצירת אינדקסים ========== //
+        await dbHandle.collection(TIMERS_COLLECTION).createIndex({ nextExecution: 1 });
+        await dbHandle.collection(TIMERS_COLLECTION).createIndex({
+            deviceId: 1,
+            daysOfWeek: 1,
+            time: 1,
+        });
+        logger && logger.info("Indexes on TIMERS_COLLECTION created successfully");
+
     } catch (error) {
         logger && logger.error("MongoDB connection error", error);
         logger && logger.info(`Failed to connect, retrying in ${reconnectIntervalInMs} ms`);
@@ -193,6 +204,55 @@ async function printDeviceStatus(deviceId) {
     const family = await dbHandle.collection(FAMILIES_COLLECTION).findOne({ "devices._id": { $regex: deviceId.trim() } });
     console.log(JSON.stringify(family, null, 2));
 }
+// ===================== Timer Functions =====================
+
+async function createTimer(timerData) {
+    const now = new Date();
+    timerData.createdAt = now;
+    timerData.updatedAt = now;
+
+    const result = await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .insertOne(timerData);
+
+    return await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .findOne({ _id: result.insertedId });
+}
+
+async function findTimersByDeviceId(deviceId) {
+    return await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .find({ deviceId })
+        .toArray();
+}
+
+async function updateTimer(timerId, updateData) {
+    updateData.updatedAt = new Date();
+
+    const result = await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .findOneAndUpdate(
+            { _id: new ObjectId(timerId) },
+            { $set: updateData },
+            { returnDocument: 'after' }
+        );
+    return result.value;
+}
+
+async function deleteTimer(timerId) {
+    const result = await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .deleteOne({ _id: new ObjectId(timerId) });
+
+    return result.deletedCount > 0;
+}
+
+async function findTimerById(timerId) {
+    return await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .findOne({ _id: new ObjectId(timerId) });
+}
 
 // ===================== Exports =====================
 export {
@@ -209,5 +269,9 @@ export {
     findSessionByToken,
     deleteSessionByToken,
     deleteAllUserSessions,
-
+    createTimer,
+    findTimersByDeviceId,
+    updateTimer,
+    deleteTimer,
+    findTimerById,
 };

@@ -6,6 +6,7 @@ import authenticateToken from "../middleware/authMiddleware.js";
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
+import * as timer  from '../timer.js'
 import AppError from './appError.js';
 
 // *************** Constants ****************//
@@ -22,7 +23,10 @@ const GOOGLE_LOGIN = "/login/google";
 const GOOGLE_CALLBACK = "/auth/callback"; 
 const REFRESH_TOKEN = "/refresh-token";
 const LOGOUT = "/logout";
-
+const GET_TIMERS = "/timers/:deviceId";
+const ADD_TIMER = "/timers";
+const UPDATE_TIMER = "/timers/:timerId";
+const DELETE_TIMER = "/timers/:timerId";
 const router = express.Router();
 
 // *************** Internal Functions ****************//
@@ -97,5 +101,10 @@ router.route(LOGOUT).post(authenticateToken, user.logoutUser);
 router.route(DEVICE_LIST_AND_FAMILY_NAME).get(authenticateToken, device.getDeviceListAndFamilyNameByfamily_id);
 router.route(GET_STATUS_DEVICE).get(authenticateToken, device.getStatus);
 router.route(TOGGLE_DEVICE).put(authenticateToken, device.toggle);
+
+router.route(GET_TIMERS).get(authenticateToken, timer.getTimersByDeviceId);
+router.route(ADD_TIMER).post(authenticateToken, timer.addTimer);
+router.route(UPDATE_TIMER).put(authenticateToken, timer.updateExistingTimer);
+router.route(DELETE_TIMER).delete(authenticateToken, timer.deleteExistingTimer);
 // *************** Export ****************//
 export default router;
