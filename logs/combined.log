@@ -167,3 +167,37 @@
 {"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
 {"level":"error","message":"[ERROR] User not found. Please sign up first"}
 {"level":"error","message":"[ERROR] User not found. Please sign up first"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] User with this email already exists"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] DateTime is not defined"}
+{"level":"error","message":"[ERROR] NextExecution is not defined"}
+{"level":"error","message":"[ERROR] NextExecution is not defined"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 14:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'split')"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'split')"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'seq')"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Failed to get or create counter document."}
+{"level":"error","message":"[ERROR] Failed to get or create counter document."}
+{"level":"error","message":"[ERROR] Failed to get or create counter document."}

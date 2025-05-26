@@ -11,6 +11,7 @@ const USERS_COLLECTION = config.mongo.usersCollectionName || "users";
 const FAMILIES_COLLECTION = config.mongo.familiesCollectionName || "families";
 const DEVICES_COLLECTION = config.mongo.devicesCollectionName || "devices";
 const SESSIONS_COLLECTION = config.mongo.sessionsCollectionName || "user_sessions";
+const TIMERS_COLLECTION = config.mongo.timersCollectionName || "timers";
 
 function getMongoConnectionString() {
     let connectionString = "";
@@ -54,6 +55,21 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
         mongoConn = await MongoClient.connect(url, options);
         dbHandle = mongoConn.db(config.mongo.mongoDBName);
         logger && logger.info("Connected to MongoDB successfully");
+
+        // ========== יצירת אינדקסים ========== //
+        await dbHandle.collection(TIMERS_COLLECTION).createIndex({ nextExecution: 1 });
+        await dbHandle.collection(TIMERS_COLLECTION).createIndex({
+            deviceId: 1,
+            daysOfWeek: 1,
+            time: 1,
+        });
+        logger && logger.info("Indexes on TIMERS_COLLECTION created successfully");
+        const existingCounter = await dbHandle.collection('counters').findOne({ _id: 'timerId' });
+        if (!existingCounter) {
+            await dbHandle.collection('counters').insertOne({ _id: 'timerId', seq: 0 });
+            logger && logger.info("Initialized timerId counter in 'counters' collection.");
+        }
+        
     } catch (error) {
         logger && logger.error("MongoDB connection error", error);
         logger && logger.info(`Failed to connect, retrying in ${reconnectIntervalInMs} ms`);
@@ -193,6 +209,75 @@ async function printDeviceStatus(deviceId) {
     const family = await dbHandle.collection(FAMILIES_COLLECTION).findOne({ "devices._id": { $regex: deviceId.trim() } });
     console.log(JSON.stringify(family, null, 2));
 }
+// ===================== Timer Functions =====================
+async function getNextTimerId() {
+    const result = await dbHandle.collection('counters').findOneAndUpdate(
+      { _id: 'timerId' },
+      { $inc: { seq: 1 } },
+      {
+        upsert: true,
+        returnDocument: 'after'
+      }
+    );
+  
+    console.log("Counter result:", result);
+  
+    const updatedDoc = result; // אין .value בגרסה שלך
+  
+    if (!updatedDoc || !updatedDoc.seq) {
+      throw new Error("Failed to get or create counter document.");
+    }
+  
+    return updatedDoc.seq;
+  }
+  
+  
+  
+  
+  async function createTimer(timerData) {
+    const now = new Date();
+    timerData.createdAt = now;
+    timerData.updatedAt = now;
+  
+    const newId = await getNextTimerId(); // ID מספרי
+    timerData._id = newId;
+  
+    await dbHandle.collection(TIMERS_COLLECTION).insertOne(timerData);
+  
+    // מחזירים את הטיימר לפי ה-ID שלנו
+    return await dbHandle
+      .collection(TIMERS_COLLECTION)
+      .findOne({ _id: newId });
+  }
+  
+async function findTimersByDeviceId(deviceId) {
+    return await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .find({ deviceId })
+        .toArray();
+}
+
+async function updateTimer(timerId, updateData) {
+    updateData.updatedAt = new Date();
+
+    const result = await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .findOneAndUpdate(
+            { _id: new ObjectId(timerId) },
+            { $set: updateData },
+            { returnDocument: 'after' }
+        );
+    return result.value;
+}
+
+async function deleteTimer(timerId) {
+    const result = await dbHandle
+        .collection(TIMERS_COLLECTION)
+        .deleteOne({ _id: new ObjectId(timerId) });
+
+    return result.deletedCount > 0;
+}
+
 
 // ===================== Exports =====================
 export {
@@ -209,5 +294,8 @@ export {
     findSessionByToken,
     deleteSessionByToken,
     deleteAllUserSessions,
-
+    createTimer,
+    findTimersByDeviceId,
+    updateTimer,
+    deleteTimer,
 };
