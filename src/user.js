@@ -246,7 +246,6 @@ async function logoutUser(req, res, next) {
   }
 }
 
-
 export {
   add_signUp,
   getUserByuserNamePassword_Login,
