@@ -1,12 +1,13 @@
 // *************** Import External Modules ****************//
 import express from 'express';
-import verifyGoogleToken from "../middleware/googleAuth.js";
 import { OAuth2Client } from 'google-auth-library';
-import authenticateToken from "../middleware/authMiddleware.js";
+import config from "config"
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
 import AppError from './appError.js';
+import authenticateToken from "../middleware/authMiddleware.js";
+import verifyGoogleToken from "../middleware/googleAuth.js";
 
 // *************** Constants ****************//
 const HELLO_WORLD = "/helloworld";
@@ -14,8 +15,8 @@ const THROW_ERROR = "/throwError";
 const SIGN_UP = "/signup";
 const LOGIN = "/login";
 const CHANGE_PASSWORD = "/change-password";
-const GET_STATUS_DEVICE="/device/status/:deviceId";
-const TOGGLE_DEVICE = "/device/toggle/:deviceId";
+const GET_STATUS_DEVICE="/device/status/:device_id";
+const TOGGLE_DEVICE = "/device/toggle/:device_id";
 const DEVICE_LIST_AND_FAMILY_NAME = "/devices";
 const GOOGLE_SIGNUP = "/signup/google";
 const GOOGLE_LOGIN = "/login/google";
@@ -66,13 +67,13 @@ router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
                 return res.status(400).json({ message: "Authorization code is missing" });
             }
             // Exchange the code for tokens using OAuth2Client
-            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            const client = new OAuth2Client(config.get("google.clientId"));
             const { tokens } = await client.getToken(code);
 
             // Verify and decode the ID token
             const ticket = await client.verifyIdToken({
                 idToken: tokens.id_token,
-                audience: process.env.GOOGLE_CLIENT_ID,
+                audience: config.get("google.clientId"),
             });
             const payload = ticket.getPayload();
 
