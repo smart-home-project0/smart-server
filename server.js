@@ -14,7 +14,7 @@ import errorHandler from "./src/lib/errorHandler.js";
 
 // *************** Application Initialization **************//
 const app = express();
-const port = config.get("port")||3005;
+const port = config.get("port")||3000;
 
 let mongoConnected = false;
 

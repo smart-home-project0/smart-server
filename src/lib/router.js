@@ -2,7 +2,6 @@
 import express from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import config from "config"
-
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
