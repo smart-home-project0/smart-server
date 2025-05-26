@@ -64,7 +64,12 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
             time: 1,
         });
         logger && logger.info("Indexes on TIMERS_COLLECTION created successfully");
-
+        const existingCounter = await dbHandle.collection('counters').findOne({ _id: 'timerId' });
+        if (!existingCounter) {
+            await dbHandle.collection('counters').insertOne({ _id: 'timerId', seq: 0 });
+            logger && logger.info("Initialized timerId counter in 'counters' collection.");
+        }
+        
     } catch (error) {
         logger && logger.error("MongoDB connection error", error);
         logger && logger.info(`Failed to connect, retrying in ${reconnectIntervalInMs} ms`);
@@ -205,21 +210,46 @@ async function printDeviceStatus(deviceId) {
     console.log(JSON.stringify(family, null, 2));
 }
 // ===================== Timer Functions =====================
-
-async function createTimer(timerData) {
+async function getNextTimerId() {
+    const result = await dbHandle.collection('counters').findOneAndUpdate(
+      { _id: 'timerId' },
+      { $inc: { seq: 1 } },
+      {
+        upsert: true,
+        returnDocument: 'after'
+      }
+    );
+  
+    console.log("Counter result:", result);
+  
+    const updatedDoc = result; // אין .value בגרסה שלך
+  
+    if (!updatedDoc || !updatedDoc.seq) {
+      throw new Error("Failed to get or create counter document.");
+    }
+  
+    return updatedDoc.seq;
+  }
+  
+  
+  
+  
+  async function createTimer(timerData) {
     const now = new Date();
     timerData.createdAt = now;
     timerData.updatedAt = now;
-
-    const result = await dbHandle
-        .collection(TIMERS_COLLECTION)
-        .insertOne(timerData);
-
+  
+    const newId = await getNextTimerId(); // ID מספרי
+    timerData._id = newId;
+  
+    await dbHandle.collection(TIMERS_COLLECTION).insertOne(timerData);
+  
+    // מחזירים את הטיימר לפי ה-ID שלנו
     return await dbHandle
-        .collection(TIMERS_COLLECTION)
-        .findOne({ _id: result.insertedId });
-}
-
+      .collection(TIMERS_COLLECTION)
+      .findOne({ _id: newId });
+  }
+  
 async function findTimersByDeviceId(deviceId) {
     return await dbHandle
         .collection(TIMERS_COLLECTION)

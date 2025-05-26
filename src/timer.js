@@ -37,7 +37,7 @@ import {
 
 // *************** Timer Controllers ****************//
 
-export async function getTimersByDeviceId(req, res, next) {
+ async function getTimersByDeviceId(req, res, next) {
   try {
     const { deviceId } = req.params;
     if (!deviceId) {
@@ -49,6 +49,7 @@ export async function getTimersByDeviceId(req, res, next) {
     next(error);
   }
 }
+
 function calculateOneTimeExecution(time) {
   const [hour, minute] = time.split(':').map(Number);
   let now = DateTime.now();
@@ -84,7 +85,7 @@ function calculateNextExecution(daysOfWeek, time) {
 
   throw new AppError(`No valid day found in daysOfWeek: ${daysOfWeek}`, 400);
 }
-export async function addTimer(req, res, next) {
+ async function addTimer(req, res, next) {
   try {
     console.log("fronted", req.body);
 
@@ -124,7 +125,7 @@ export async function addTimer(req, res, next) {
   }
 }
 
-export async function updateExistingTimer(req, res, next) {
+ async function updateExistingTimer(req, res, next) {
   try {
     const { timerId } = req.params;
     const timerData = req.body;
@@ -144,7 +145,7 @@ export async function updateExistingTimer(req, res, next) {
   }
 }
 
-export async function deleteExistingTimer(req, res, next) {
+ async function deleteExistingTimer(req, res, next) {
   try {
     const { timerId } = req.params;
     const deleted = await deleteTimer(timerId);
@@ -157,3 +158,4 @@ export async function deleteExistingTimer(req, res, next) {
     next(error);
   }
 }
+export {getTimersByDeviceId,addTimer,updateExistingTimer,deleteExistingTimer};
