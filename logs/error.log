@@ -202,3 +202,18 @@
 {"level":"error","message":"[ERROR] Failed to get or create counter document."}
 {"level":"error","message":"[ERROR] Failed to get or create counter document."}
 {"level":"error","message":"[ERROR] Failed to get or create counter document."}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] Invalid daysOfWeek format"}
+{"level":"error","message":"[ERROR] Invalid daysOfWeek format"}
+{"level":"error","message":"[ERROR] Invalid daysOfWeek format"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}

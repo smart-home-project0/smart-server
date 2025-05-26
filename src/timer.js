@@ -127,7 +127,7 @@ function calculateNextExecution(daysOfWeek, time) {
 
  async function updateExistingTimer(req, res, next) {
   try {
-    const { timerId } = req.params;
+    const timerId = Number(req.params.timerId);
     const timerData = req.body;
 
     // אמת לפי סכמת updateTimerSchema (שדות אופציונליים)
@@ -147,7 +147,8 @@ function calculateNextExecution(daysOfWeek, time) {
 
  async function deleteExistingTimer(req, res, next) {
   try {
-    const { timerId } = req.params;
+    const timerId = Number(req.params.timerId);
+
     const deleted = await deleteTimer(timerId);
 
     if (!deleted){ 
