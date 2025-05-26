@@ -5,6 +5,8 @@ import addFormats from "ajv-formats";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { DateTime } from "luxon";
+
 
 // *************** Load JSON Schemas using Ajv ****************//
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -46,17 +48,70 @@ export async function getTimersByDeviceId(req, res, next) {
     next(error);
   }
 }
+function calculateOneTimeExecution(time) {
+  const [hour, minute] = time.split(':').map(Number);
+  let now = DateTime.now();
+  let target = now.set({ hour, minute, second: 0, millisecond: 0 });
 
+  // אם השעה כבר עברה, קובעים למחר
+  if (target <= now) {
+    target = target.plus({ days: 1 });
+  }
+
+  if (!target.isValid) {
+    throw new AppError(`Invalid time for one-time execution: ${time}`, 400);
+  }
+
+  return target.toJSDate();
+}
+function calculateNextExecution(daysOfWeek, time) {
+  const [hour, minute] = time.split(':').map(Number);
+  const now = DateTime.now();
+  const todayWeekday = (now.weekday % 7); // 0=שבת, 6=ראשון
+
+  for (let offset = 0; offset < 7; offset++) {
+    const targetDay = (todayWeekday + offset) % 7;
+    if (daysOfWeek[6 - targetDay] === '1') {
+      let candidate = now.plus({ days: offset }).set({ hour, minute, second: 0, millisecond: 0 });
+
+      // אם זה היום, אבל השעה כבר עברה – תדלג ליום הבא
+      if (candidate <= now) continue;
+
+      return candidate.toJSDate();
+    }
+  }
+
+  throw new AppError(`No valid day found in daysOfWeek: ${daysOfWeek}`, 400);
+}
 export async function addTimer(req, res, next) {
   try {
+    console.log("fronted", req.body);
+
     const timerData = req.body;
 
     // אמת לפי סכמת addTimerSchema
     const { isValid, errors } = validateSchema("addTimerSchema", timerData);
     if (!isValid) throw new AppError("Invalid timer data", 400, errors);
 
-    // הוספת הסטטוס אחרי האימות
-    const timerWithStatus = { ...timerData, status: "PENDING" };
+    if (!timerData.time) {
+      throw new AppError("Missing 'time' field", 400);
+    }
+
+    let nextExecution;
+    if (timerData.daysOfWeek === '0000000') {
+      console.log("Calculating one-time execution for:", timerData.time);
+      nextExecution = calculateOneTimeExecution(timerData.time);
+    } else {
+      console.log("Calculating recurring execution for:", timerData.daysOfWeek, timerData.time);
+      nextExecution = calculateNextExecution(timerData.daysOfWeek, timerData.time);
+    }
+
+    // הוספת הסטטוס ו-nextExecution
+    const timerWithStatus = {
+      ...timerData,
+      status: "PENDING",
+      nextExecution,
+    };
 
     const newTimer = await createTimer(timerWithStatus);
     res.status(201).json({ message: "Timer created successfully.", timer: newTimer });
@@ -66,7 +121,6 @@ export async function addTimer(req, res, next) {
     next(error);
   }
 }
-
 
 export async function updateExistingTimer(req, res, next) {
   try {

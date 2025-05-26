@@ -185,3 +185,15 @@
 {"level":"error","message":"[ERROR] Invalid timer data"}
 {"level":"error","message":"[ERROR] Invalid timer data"}
 {"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] DateTime is not defined"}
+{"level":"error","message":"[ERROR] NextExecution is not defined"}
+{"level":"error","message":"[ERROR] NextExecution is not defined"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 14:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'split')"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'split')"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
