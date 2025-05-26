@@ -40,7 +40,8 @@ import {
 export async function getTimersByDeviceId(req, res, next) {
   try {
     const { deviceId } = req.params;
-    if (!deviceId) throw new AppError("Device ID is required.", 400);
+    if (!deviceId) {
+      throw new AppError("Device ID is required.", 400);  }
 
     const timers = await findTimersByDeviceId(deviceId);
     res.status(200).json({ message: "Timers fetched successfully.", timers });
@@ -91,7 +92,8 @@ export async function addTimer(req, res, next) {
 
     // אמת לפי סכמת addTimerSchema
     const { isValid, errors } = validateSchema("addTimerSchema", timerData);
-    if (!isValid) throw new AppError("Invalid timer data", 400, errors);
+    if (!isValid){
+       throw new AppError("Invalid timer data", 400, errors); }
 
     if (!timerData.time) {
       throw new AppError("Missing 'time' field", 400);
@@ -129,10 +131,12 @@ export async function updateExistingTimer(req, res, next) {
 
     // אמת לפי סכמת updateTimerSchema (שדות אופציונליים)
     const { isValid, errors } = validateSchema("updateTimerSchema", timerData);
-    if (!isValid) throw new AppError("Invalid timer update data", 400, errors);
+    if (!isValid) {
+      throw new AppError("Invalid timer update data", 400, errors); }
 
     const updated = await updateTimer(timerId, timerData);
-    if (!updated) return res.status(404).json({ message: "Timer not found." });
+    if (!updated) {
+      return res.status(404).json({ message: "Timer not found." }); }
 
     res.status(200).json({ message: "Timer updated successfully.", timer: updated });
   } catch (error) {
@@ -145,7 +149,8 @@ export async function deleteExistingTimer(req, res, next) {
     const { timerId } = req.params;
     const deleted = await deleteTimer(timerId);
 
-    if (!deleted) return res.status(404).json({ message: "Timer not found." });
+    if (!deleted){ 
+       return res.status(404).json({ message: "Timer not found." }); }
 
     res.status(200).json({ message: "Timer deleted successfully." });
   } catch (error) {

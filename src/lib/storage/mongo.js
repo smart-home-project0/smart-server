@@ -248,11 +248,6 @@ async function deleteTimer(timerId) {
     return result.deletedCount > 0;
 }
 
-async function findTimerById(timerId) {
-    return await dbHandle
-        .collection(TIMERS_COLLECTION)
-        .findOne({ _id: new ObjectId(timerId) });
-}
 
 // ===================== Exports =====================
 export {
@@ -273,5 +268,4 @@ export {
     findTimersByDeviceId,
     updateTimer,
     deleteTimer,
-    findTimerById,
 };

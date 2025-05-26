@@ -1,7 +1,6 @@
 // *************** Import External Modules ****************//
 import express from 'express';
 import verifyGoogleToken from "../middleware/googleAuth.js";
-import { OAuth2Client } from 'google-auth-library';
 import authenticateToken from "../middleware/authMiddleware.js";
 // *************** Import Internal Modules ****************//
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
@@ -20,13 +19,10 @@ const TOGGLE_DEVICE = "/device/toggle/:deviceId";
 const DEVICE_LIST_AND_FAMILY_NAME = "/devices";
 const GOOGLE_SIGNUP = "/signup/google";
 const GOOGLE_LOGIN = "/login/google";
-const GOOGLE_CALLBACK = "/auth/callback"; 
 const REFRESH_TOKEN = "/refresh-token";
 const LOGOUT = "/logout";
-const GET_TIMERS = "/timers/:deviceId";
-const ADD_TIMER = "/timers";
-const UPDATE_TIMER = "/timers/:timerId";
-const DELETE_TIMER = "/timers/:timerId";
+const TIMERS = "/timers";
+const TIMER_BY_ID = "/timers/:timerId";
 const router = express.Router();
 
 // *************** Internal Functions ****************//
@@ -61,38 +57,6 @@ router.route(CHANGE_PASSWORD).put(authenticateToken, user.changePassword);
 router.route(GOOGLE_SIGNUP).post(verifyGoogleToken, user.add_signUpWithGoogle);
 
 router.route(GOOGLE_LOGIN).post(verifyGoogleToken, user.getUserByGoogle_Login);
-
-//Route to handle Google OAuth2 callback
-router.route(GOOGLE_CALLBACK).get(async (req, res, next) => {
-        try {
-            const { code } = req.query;  // קבלת קוד האישור מה-query parameter
-            if (!code) {
-                return res.status(400).json({ message: "Authorization code is missing" });
-            }
-            // Exchange the code for tokens using OAuth2Client
-            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-            const { tokens } = await client.getToken(code);
-
-            // Verify and decode the ID token
-            const ticket = await client.verifyIdToken({
-                idToken: tokens.id_token,
-                audience: process.env.GOOGLE_CLIENT_ID,
-            });
-            const payload = ticket.getPayload();
-
-            // Store user information in session or JWT token
-            req.user = payload;
-
-            // Respond with user information or redirect to a client-side page
-            res.json({
-                message: "Google OAuth callback successful",
-                user: payload, // Send the user information
-                tokens,
-            });
-        } catch (error) {
-            next(error);
-        }
-    });
 router.route(REFRESH_TOKEN).post(user.refreshAccessToken);
 router.route(LOGOUT).post(authenticateToken, user.logoutUser);
 
@@ -102,9 +66,10 @@ router.route(DEVICE_LIST_AND_FAMILY_NAME).get(authenticateToken, device.getDevic
 router.route(GET_STATUS_DEVICE).get(authenticateToken, device.getStatus);
 router.route(TOGGLE_DEVICE).put(authenticateToken, device.toggle);
 
-router.route(GET_TIMERS).get(authenticateToken, timer.getTimersByDeviceId);
-router.route(ADD_TIMER).post(authenticateToken, timer.addTimer);
-router.route(UPDATE_TIMER).put(authenticateToken, timer.updateExistingTimer);
-router.route(DELETE_TIMER).delete(authenticateToken, timer.deleteExistingTimer);
+router.get(`${TIMERS}/:deviceId`, authenticateToken, timer.getTimersByDeviceId);
+router.post(TIMERS, authenticateToken, timer.addTimer);
+router.put(TIMER_BY_ID, authenticateToken, timer.updateExistingTimer);
+router.delete(TIMER_BY_ID, authenticateToken, timer.deleteExistingTimer);
+
 // *************** Export ****************//
 export default router;
