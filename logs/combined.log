@@ -160,7 +160,123 @@
 {"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
 {"level":"error","message":"[ERROR] Error toggling device: permission deny"}
 {"level":"error","message":"[ERROR] Error toggling device: permission deny"}
-
-
-{"level":"error","message":"[ERROR] Request failed with status code 400"}
-{"level":"error","message":"[ERROR] Request failed with status code 400"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] User not found. Please sign up first"}
+{"level":"error","message":"[ERROR] User not found. Please sign up first"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] User with this email already exists"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] DateTime is not defined"}
+{"level":"error","message":"[ERROR] NextExecution is not defined"}
+{"level":"error","message":"[ERROR] NextExecution is not defined"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 14:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Invalid date or time for one-time execution: undefined 15:00"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'split')"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'split')"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Cannot read properties of undefined (reading 'seq')"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] Failed to get or create counter document."}
+{"level":"error","message":"[ERROR] Failed to get or create counter document."}
+{"level":"error","message":"[ERROR] Failed to get or create counter document."}
+{"level":"error","message":"[ERROR] input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}
+{"level":"error","message":"[ERROR] Invalid or expired access token"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0000010"}
+{"level":"error","message":"[ERROR] Invalid daysOfWeek format"}
+{"level":"error","message":"[ERROR] Invalid daysOfWeek format"}
+{"level":"error","message":"[ERROR] Invalid daysOfWeek format"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] No refresh token provided"}
+{"level":"error","message":"[ERROR] No refresh token provided"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Error with tuya server"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Device ID is required."}
+{"level":"error","message":"[ERROR] Assignment to constant variable."}
+{"level":"error","message":"[ERROR] Assignment to constant variable."}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Incorrect password"}
+{"level":"error","message":"[ERROR] Invalid timer update data"}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] "}
+{"level":"error","message":"[ERROR] next is not a function"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
+{"level":"error","message":"[ERROR] Invalid timer data"}
