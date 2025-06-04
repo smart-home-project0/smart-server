@@ -7,8 +7,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import axios from "axios";
-import config from "config";
-
+import config  from "config"
 // **** Import necessary dependencies ****
 import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId, updateDeviceStatus } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
@@ -71,8 +70,11 @@ async function toggle(req, res, next) {
     if (!deviceNumberId) {
       throw new AppError("No found id from tuya to this deviceId", 400);
     }
+    
     //פנייה לשרת של טויה
     const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceNumberId}`, { status: status });
+console.log(`response sss ${response.data.result}`);
+
     if (response.data.result != true) {
       throw new AppError("Error with tuya server", 400);
     }
@@ -101,6 +103,7 @@ async function getStatus(req, res, next) {
       throw new AppError("No found id from tuya to this deviceId", 400);
     }
     const response = await axios.get(`${tuyaServerBaseUrl}/device/status/${deviceNumberId}`);
+    
     if (response.data.result != true) {
       throw new AppError("Error with tuya server", 400);
     }
