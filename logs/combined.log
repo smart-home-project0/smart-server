@@ -164,3 +164,8 @@
 
 {"level":"error","message":"[ERROR] Request failed with status code 400"}
 {"level":"error","message":"[ERROR] Request failed with status code 400"}
+{"level":"error","message":"[ERROR] Access token missing"}
+{"level":"error","message":"[ERROR] Request failed with status code 400"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Request failed with status code 400"}
