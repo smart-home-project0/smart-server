@@ -180,7 +180,7 @@ async function updateDeviceStatus(device_id, status) {
     // אם הסטטוס כבר תואם, אין צורך בעדכון
     if (device.status === mongoStatus) {
         console.log(`Device ${device_id} already has status ${mongoStatus}. No update needed.`);
-        return 0; // מחזיר 0 אם הסטטוס כבר תואם
+        return {success:true,state:"noChange"}; 
     }
     // עדכון סטטוס המכשיר
     const result = await deviceCollection.updateOne(
@@ -191,8 +191,9 @@ async function updateDeviceStatus(device_id, status) {
         console.log(`result.modifiedCount: ${result.modifiedCount}`);
         throw new AppError(`Device with ID ${device_id} not found or status not updated.`, 400);
     }
-    console.log(`Device ${device_id} status updated to ${mongoStatus}.`);
-    return result.modifiedCount;
+    console.log(`answerd from mongo: Device ${device_id} status updated to ${mongoStatus}.`);
+    console.log(result);
+    return {success:true,state:"change"}; 
 }
 
 // ===================== Exports =====================

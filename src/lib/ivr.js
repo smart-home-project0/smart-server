@@ -1,7 +1,6 @@
 import axios from "axios";
 import config from "config";
-const tuyaServerBaseUrl = config.get("tuya.serverBaseUrl");
-
+import { generalToggleDevice } from "./utils/deviceService.js"
 async function handleIVR(req, res) {
     console.log("IVR request received:", req.body);
     const { ApiExtension } = req.body;
@@ -9,31 +8,40 @@ async function handleIVR(req, res) {
     if (!ApiExtension) {
         return res.status(400).json({ error: 'Missing ApiExtension' });
     }
+    const device_id=1;
     switch (ApiExtension) {
         case '1': {
             try {
-                const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/bfcca327de01d70a53yjvi`, { status: true });
-                console.log("Tuya Response:", response.data);
-                return "הפעולה בוצעה בהצלחה. המכשיר נדלק. תודה שהתקשרת";
+                const result = await generalToggleDevice(device_id, true);
+                console.log(`result from IVR 1 ${result}`);
+                if (result.updated.success) {
+                    return res.send("הפעולה בוצעה בהצלחה. המכשיר נדלק. תודה שהתקשרת.");
+                }
+                else {
+                    return res.send("לא התקבלה תשובה תקינה מהמכשיר. נא לנסות שוב.");
+                }
             } catch (error) {
-                console.error("Tuya Error:", error?.response?.data || error.message);
-                return res.json({ TTS: "אירעה שגיאה בביצוע הפעולה. נא לנסות שוב." });
+                console.error("Tuya Error:", error?.result?.data || error.message);
+                return res.send("אירעה שגיאה בביצוע הפעולה. נא לנסות שוב.");
             }
         }
         case '2': {
             try {
-                const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/bfcca327de01d70a53yjvi`, { status: false });
-                console.log("Tuya Response:", response.data);
-                return res.json({ TTS: "הפעולה בוצעה בהצלחה. המכשיר נכבה. תודה שהתקשרת" });
+                const result = await generalToggleDevice(device_id, false);
+                console.log(`result from IVR 2 ${result}`);
+                if (result.updated.success) {
+                    return res.send("הפעולה בוצעה בהצלחה. המכשיר נכבה. תודה שהתקשרת.");
+                }
+                else {
+                    return res.send("לא התקבלה תשובה תקינה מהמכשיר. נא לנסות שוב.");
+                }
             } catch (error) {
                 console.error("Tuya Error:", error?.response?.data || error.message);
-                return res.json({ TTS: "אירעה שגיאה בביצוע הפעולה. נא לנסות שוב." });
+                return res.send("אירעה שגיאה בביצוע הפעולה. נא לנסות שוב.");
             }
         }
         default:
-            return res.json({
-                TTS: "מספר לא תקין. השלוחה לא מוגדרת"
-            });
+            return res.send("מספר לא תקין. השלוחה לא מוגדרת");
     }
 }
 export { handleIVR }
