@@ -12,6 +12,7 @@ import errorHandler from "./src/lib/errorHandler.js";
 
 
 
+
 // *************** Application Initialization **************//
 const app = express();
 const port = config.get("port")||3005;
@@ -21,6 +22,7 @@ let mongoConnected = false;
 // *************** Middleware Setup **************//
 // *************** Middleware Setup **************//
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
   origin: config.get("frontendUrl"), // קרא את כתובת ה-Frontend מהמשתנה בסביבה

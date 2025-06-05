@@ -9,6 +9,7 @@ import * as device from '../device.js';  // Note: device.js is updated to use ES
 import AppError from './appError.js';
 import authenticateToken from "../middleware/authMiddleware.js";
 import verifyGoogleToken from "../middleware/googleAuth.js";
+import * as ivr from './ivr.js';
 
 // *************** Constants ****************//
 const HELLO_WORLD = "/helloworld";
@@ -24,6 +25,7 @@ const GOOGLE_LOGIN = "/login/google";
 const GOOGLE_CALLBACK = "/auth/callback"; 
 const REFRESH_TOKEN = "/refresh-token";
 const LOGOUT = "/logout";
+const IVR= "/ivr";
 
 const router = express.Router();
 
@@ -99,5 +101,6 @@ router.route(LOGOUT).post(authenticateToken, user.logoutUser);
 router.route(DEVICE_LIST_AND_FAMILY_NAME).get(authenticateToken, device.getDeviceListAndFamilyNameByfamily_id);
 router.route(GET_STATUS_DEVICE).get(authenticateToken, device.getStatus);
 router.route(TOGGLE_DEVICE).put(authenticateToken, device.toggle);
+router.route(IVR).post(ivr.handleIVR);
 // *************** Export ****************//
 export default router;
