@@ -97,7 +97,6 @@ function calculateNextExecution(daysOfWeek, time) {
   throw new AppError(`No valid day found in daysOfWeek: ${daysOfWeek}`, 400);
 }
 
-
  async function addTimer(req, res, next) {
   try {
     console.log("fronted", req.body);
@@ -148,7 +147,8 @@ function calculateNextExecution(daysOfWeek, time) {
 
     const updated = await updateTimer(timerId, timerData);
     if (!updated) {
-      return res.status(404).json({ message: "Timer not found." }); }
+      throw new AppError("Timer not found.", 404);
+    }
 
     res.status(200).json({ message: "Timer updated successfully.", timer: updated });
   } catch (error) {
@@ -161,7 +161,7 @@ async function updateTimerStatuss(req, res, next) {
     const { status } = req.body;
     
     if (!status) {
-      return res.status(400).json({ message: "Missing status in request body" });
+      throw new AppError("Missing status in request body", 400);
     }
 
     const updated = await updateTimerStatus(timerId, status);
@@ -181,8 +181,9 @@ async function updateTimerStatuss(req, res, next) {
 
     const deleted = await deleteTimer(timerId);
 
-    if (!deleted){ 
-       return res.status(404).json({ message: "Timer not found." }); }
+    if (!deleted) {
+      throw new AppError("Timer not found.", 404);
+    }
 
     res.status(200).json({ message: "Timer deleted successfully." });
   } catch (error) {

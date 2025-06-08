@@ -12,7 +12,7 @@ function authenticateToken(req, res, next) {
   }
   jwt.verify(token, config.get("google.accessSecretKey"), (err, user) => {
     if (err) {
-      return res.status(403).json({ message: 'Token is invalid.' });
+      return next(new AppError('Token is invalid.', 403));
     }
     req.user = user;
     next();
