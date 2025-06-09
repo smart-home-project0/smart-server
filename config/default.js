@@ -14,7 +14,7 @@ export default {
     serverBaseUrl: process.env.TUYA_SERVER_BASE_URL
   },
   "mongo": {
-    "uri": "mongodb+srv://smarthomeproject00:a123456@smarthomecluster.igahdus.mongodb.net/SmartHome?retryWrites=true&w=majority",
+    "uri": process.env.MONGO_URI ,
     "mongoDBName": "SmartHome",
     "connectTimeoutMS": 60000,
     "usersCollectionName": "users",
