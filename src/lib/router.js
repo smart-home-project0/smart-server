@@ -27,6 +27,7 @@ const REFRESH_TOKEN = "/refresh-token";
 const LOGOUT = "/logout";
 const IVR= "/ivr";
 
+
 const router = express.Router();
 
 // *************** Internal Functions ****************//
@@ -101,6 +102,7 @@ router.route(LOGOUT).post(authenticateToken, user.logoutUser);
 router.route(DEVICE_LIST_AND_FAMILY_NAME).get(authenticateToken, device.getDeviceListAndFamilyNameByfamily_id);
 router.route(GET_STATUS_DEVICE).get(authenticateToken, device.getStatus);
 router.route(TOGGLE_DEVICE).put(authenticateToken, device.toggle);
+router.route(`${IVR}/menu`).post(ivr.handleMenu);
 router.route(IVR).post(ivr.handleIVR);
 // *************** Export ****************//
 export default router;

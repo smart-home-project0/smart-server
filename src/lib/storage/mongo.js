@@ -34,8 +34,8 @@ function getMongoConnectionString() {
     if (queryParams.length > 0) {
         connectionString += `?${queryParams.join("&")}`;
 
-    return connectionString;
-}
+        return connectionString;
+    }
 }
 async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
     const url = getMongoConnectionString();
@@ -66,29 +66,30 @@ async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
 
 async function findUserByEmail(email) {
     return await dbHandle
-    .collection(USERS_COLLECTION)
-    .findOne({ email });
+        .collection(USERS_COLLECTION)
+        .findOne({ email });
 }
 
 async function createUser(userData) {
     const result = await dbHandle
-    .collection(USERS_COLLECTION)
-    .insertOne(userData);
+        .collection(USERS_COLLECTION)
+        .insertOne(userData);
     const newUser = await dbHandle
-    .collection(USERS_COLLECTION)
-    .findOne({ _id: result.insertedId });
-    return newUser;}
+        .collection(USERS_COLLECTION)
+        .findOne({ _id: result.insertedId });
+    return newUser;
+}
 
 async function findUserById(userId) {
     return await dbHandle
-    .collection(USERS_COLLECTION)
-    .findOne({ _id: new ObjectId(userId) });
+        .collection(USERS_COLLECTION)
+        .findOne({ _id: new ObjectId(userId) });
 }
 
 async function updateUser(userId, updateData) {
     await dbHandle
-    .collection(USERS_COLLECTION)
-    .updateOne({ _id: new ObjectId(userId) }, { $set: updateData });
+        .collection(USERS_COLLECTION)
+        .updateOne({ _id: new ObjectId(userId) }, { $set: updateData });
     return updateData;
 }
 
@@ -102,29 +103,29 @@ async function createUserSession(userId, refreshToken, expiresAt) {
         expiresAt: new Date(expiresAt),
     };
     await dbHandle
-    .collection(SESSIONS_COLLECTION)
-    .insertOne(session);
+        .collection(SESSIONS_COLLECTION)
+        .insertOne(session);
     return session;
 }
 async function findSessionByToken(token) {
     return await dbHandle
-    .collection(SESSIONS_COLLECTION)
-    .findOne({ refreshToken: token });
+        .collection(SESSIONS_COLLECTION)
+        .findOne({ refreshToken: token });
 }
 
 async function deleteSessionByToken(token) {
     await dbHandle
-    .collection(SESSIONS_COLLECTION)
-    .deleteOne({ refreshToken: token });
+        .collection(SESSIONS_COLLECTION)
+        .deleteOne({ refreshToken: token });
 }
 
 
 async function deleteAllUserSessions(userId) {
     await dbHandle
-    .collection(SESSIONS_COLLECTION)
-    .deleteMany({ userId: new ObjectId(userId) });
+        .collection(SESSIONS_COLLECTION)
+        .deleteMany({ userId: new ObjectId(userId) });
 
- }
+}
 //פונקציה לשליפת שם משפחה לפי family_id
 //לשים לב שזה לא מיוצא
 // async function findFamilyNameByfamily_id(family_id) {
@@ -142,12 +143,12 @@ async function deleteAllUserSessions(userId) {
 async function createFamily(name) {
     const newFamily = { name: `${name} Family`, devices: [] };
     const result = await dbHandle
-    .collection(FAMILIES_COLLECTION)
-    .insertOne(newFamily);
+        .collection(FAMILIES_COLLECTION)
+        .insertOne(newFamily);
     return result.insertedId;
 }
 
- async function findDevicesAndFamilyNameByfamily_id(family_id) {
+async function findDevicesAndFamilyNameByfamily_id(family_id) {
     const family = await dbHandle
         .collection(FAMILIES_COLLECTION)
         .findOne({ _id: new ObjectId(family_id) });
@@ -180,7 +181,7 @@ async function updateDeviceStatus(device_id, status) {
     // אם הסטטוס כבר תואם, אין צורך בעדכון
     if (device.status === mongoStatus) {
         console.log(`Device ${device_id} already has status ${mongoStatus}. No update needed.`);
-        return {success:true,state:"noChange"}; 
+        return { success: true, state: "noChange" };
     }
     // עדכון סטטוס המכשיר
     const result = await deviceCollection.updateOne(
@@ -193,7 +194,50 @@ async function updateDeviceStatus(device_id, status) {
     }
     console.log(`answerd from mongo: Device ${device_id} status updated to ${mongoStatus}.`);
     console.log(result);
-    return {success:true,state:"change"}; 
+    return { success: true, state: "change" };
+}
+
+// פונקציה לשליפת מכשירים לפי מספר טלפון
+async function findDevicesByPhoneNumber(phoneNumber) {
+    // שלב 1: מציאת המשתמש לפי מספר טלפון
+    console.log(`hi evrey body: ${phoneNumber}`);
+
+    const user = await dbHandle
+        .collection(USERS_COLLECTION)
+        .findOne({ phone_number: phoneNumber });
+    console.log("user:", user);
+
+    if (!user || !user.family_id) {
+        throw new AppError('משתמש לא נמצא או שאין לו משפחה משויכת.', 404);
+    }
+    // שלב 2: מציאת המשפחה
+    const family = await dbHandle
+        .collection(FAMILIES_COLLECTION)
+        .findOne({ _id: new ObjectId(user.family_id) });
+    console.log("family", family);
+
+    if (!family || !family.devices || family.devices.length === 0) {
+        console.log("dhafdjlnfhafdjak");
+        return {
+            familyName: family?.name || null,
+            devices: []
+        };
+    }
+
+    // שלב 3: שליפת המכשירים עצמם מתוך מזהי המכשירים
+    const deviceIds = family.devices;
+    console.log("deviceIds", deviceIds);
+
+    const devices = await dbHandle
+        .collection(DEVICES_COLLECTION)
+        .find({ _id: { $in: deviceIds } })
+        .toArray();
+    console.log("devices", devices);
+
+    return {
+        familyName: family.name,
+        devices
+    };
 }
 
 // ===================== Exports =====================
@@ -210,6 +254,7 @@ export {
     createUserSession,
     findSessionByToken,
     deleteSessionByToken,
-    deleteAllUserSessions
+    deleteAllUserSessions,
+    findDevicesByPhoneNumber
 }
 

@@ -172,3 +172,4 @@
 {"level":"error","message":"[ERROR] Request failed with status code 400"}
 {"level":"error","message":"[ERROR] toggleDeviceStatus is not defined"}
 {"level":"error","message":"[ERROR] toggleDeviceStatus is not defined"}
+{"level":"error","message":"[ERROR] Request failed with status code 400"}
