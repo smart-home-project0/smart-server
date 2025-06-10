@@ -1,9 +1,9 @@
 // *************** Require External Modules ****************//
-import config  from "config"
-import { MongoClient, ObjectId } from 'mongodb';
+import config from "config";
+import { MongoClient, ObjectId } from "mongodb";
 
 // *************** Require Internal Modules ****************//
-import AppError from '../appError.js';
+import AppError from "../appError.js";
 
 let dbHandle, mongoConn;
 
@@ -14,70 +14,77 @@ const SESSIONS_COLLECTION = config.get("mongo.sessionsCollectionName") || "user_
 const TIMERS_COLLECTION = config.get("mongo.timersCollectionName") || "timers";
 
 function getMongoConnectionString() {
-    let connectionString = "";
-    if (config.get("mongo.uri_prefix")) {
-        connectionString += `${config.get("mongo.uri_prefix")}://`;
-    }
-    if (config.get("mongo.username") && config.get("mongo.password")) {
-        const encodedPassword = encodeURIComponent(config.get("mongo.password"));
-        connectionString += `${config.get("mongo.username")}:${encodedPassword}@`;
-    }
-    if (config.get("mongo.cluster_url")) {
-        connectionString += `${config.get("mongo.cluster_url")}`;
-    }
-    if (config.get("mongo.mongoDBName")) {
-        connectionString += `/${config.get("mongo.mongoDBName")}`;
-    }
+  // Use the full connection string from config if available
+  if (config.has("mongo.uri") && config.get("mongo.uri").length > 0) {
+            console.log("Using mongo.uri:", config.get("mongo.uri"));
 
-    const queryParams = [];
-    if (config.get("mongo.connectTimeoutMS")) {
-        queryParams.push(`connectTimeoutMS=${config.get("mongo.connectTimeoutMS")}`);
-    }
-    if (queryParams.length > 0) {
-        connectionString += `?${queryParams.join("&")}`;
-
-        return connectionString;
-    }
+    return config.get("mongo.uri");
+  }
+  // Fallback to building the string from parts (legacy)
+  let connectionString = "";
+  if (config.has("mongo.uri_prefix")) {
+    connectionString += `${config.get("mongo.uri_prefix")}://`;
+  }
+  if (config.has("mongo.username") && config.has("mongo.password")) {
+    const encodedPassword = encodeURIComponent(config.get("mongo.password"));
+    connectionString += `${config.get("mongo.username")}:${encodedPassword}@`;
+  }
+  if (config.has("mongo.cluster_url")) {
+    connectionString += config.get("mongo.cluster_url");
+  }
+  if (config.has("mongo.mongoDBName")) {
+    connectionString += `/${config.get("mongo.mongoDBName")}`;
+  }
+  const queryParams = [];
+  if (config.has("mongo.connectTimeoutMS")) {
+    queryParams.push(`connectTimeoutMS=${config.get("mongo.connectTimeoutMS")}`);
+  }
+  if (queryParams.length > 0) {
+    connectionString += `?${queryParams.join("&")}`;
+  }
+  return connectionString;
 }
+
 async function connectToMongo(logger, reconnectIntervalInMs = 5000) {
-    const url = getMongoConnectionString();
-    const options = {
-        maxPoolSize: 5,
-        readPreference: "nearest",
-        appname: "smartHome",
-        connectTimeoutMS: 30000,
-    };
+  const url = getMongoConnectionString();
+  const options = {
+    maxPoolSize: 5,
+    readPreference: "nearest",
+    appName: "smartHome",
+    connectTimeoutMS: 30000,
+  };
 
-    try {
-        logger && logger.info(`Connecting to MongoDB at ${url}`);
-        if (mongoConn) {
-            await mongoConn.close();
-            logger && logger.info("Previous MongoDB connection closed.");
-        }
-        mongoConn = await MongoClient.connect(url, options);
-        dbHandle = mongoConn.db(config.mongo.mongoDBName);
-        logger && logger.info("Connected to MongoDB successfully");
-
-        await dbHandle.collection(TIMERS_COLLECTION).createIndex({ nextExecution: 1 });
-        await dbHandle.collection(TIMERS_COLLECTION).createIndex({
-            deviceId: 1,
-            daysOfWeek: 1,
-            time: 1,
-        });
-        logger && logger.info("Indexes on TIMERS_COLLECTION created successfully");
-
-        const existingCounter = await dbHandle.collection('counters').findOne({ _id: 'timerId' });
-        if (!existingCounter) {
-            await dbHandle.collection('counters').insertOne({ _id: 'timerId', seq: 0 });
-            logger && logger.info("Initialized timerId counter in 'counters' collection.");
-        }
-
-    } catch (error) {
-        logger && logger.error("MongoDB connection error", error);
-        logger && logger.info(`Failed to connect, retrying in ${reconnectIntervalInMs} ms`);
-        setTimeout(() => connectToMongo(logger, reconnectIntervalInMs), reconnectIntervalInMs);
+  try {
+    logger && logger.info(`Connecting to MongoDB at ${url}`);
+    if (mongoConn) {
+      await mongoConn.close();
+      logger && logger.info("Previous MongoDB connection closed.");
     }
+    mongoConn = await MongoClient.connect(url, options);
+    dbHandle = mongoConn.db(config.get("mongo.mongoDBName"));
+
+    logger && logger.info("Connected to MongoDB successfully");
+
+    await dbHandle.collection(TIMERS_COLLECTION).createIndex({ nextExecution: 1 });
+    await dbHandle.collection(TIMERS_COLLECTION).createIndex({
+      deviceId: 1,
+      daysOfWeek: 1,
+      time: 1,
+    });
+    logger && logger.info("Indexes on TIMERS_COLLECTION created successfully");
+
+    const existingCounter = await dbHandle.collection("counters").findOne({ _id: "timerId" });
+    if (!existingCounter) {
+      await dbHandle.collection("counters").insertOne({ _id: "timerId", seq: 0 });
+      logger && logger.info("Initialized timerId counter in 'counters' collection.");
+    }
+  } catch (error) {
+    logger && logger.error("MongoDB connection error", error);
+    logger && logger.info(`Failed to connect, retrying in ${reconnectIntervalInMs} ms`);
+    setTimeout(() => connectToMongo(logger, reconnectIntervalInMs), reconnectIntervalInMs);
+  }
 }
+
 
 // ===================== User Functions =====================
 
