@@ -817,3 +817,8 @@
 {"level":"error","message":"[ERROR] Token is invalid."}
 {"level":"error","message":"[ERROR] Token is invalid."}
 {"level":"error","message":"[ERROR] Token is invalid."}
+{"level":"error","message":"[ERROR] Token is invalid."}
+{"level":"error","message":"[ERROR] Cannot set headers after they are sent to the client"}
+{"level":"error","message":"[ERROR] Token is invalid."}
+{"level":"error","message":"[ERROR] Request failed with status code 500"}
+{"level":"error","message":"[ERROR] Request failed with status code 500"}

@@ -4,6 +4,7 @@ import express from 'express';
 import * as user from '../user.js';  // Note: user.js is updated to use ES Modules
 import * as device from '../device.js';  // Note: device.js is updated to use ES Modules
 import * as timer from '../timer.js'
+import * as ivr from './ivr.js';
 import AppError from './appError.js';
 import authenticateToken from "../middleware/authMiddleware.js";
 import verifyGoogleToken from "../middleware/googleAuth.js";
@@ -23,6 +24,8 @@ const REFRESH_TOKEN = "/refresh-token";
 const LOGOUT = "/logout";
 const TIMERS = "/timers";
 const TIMER_BY_ID = "/timers/:timerId";
+const IVR = "/ivr";
+
 const router = express.Router();
 
 // *************** Internal Functions ****************//
@@ -71,5 +74,7 @@ router.post(TIMERS, authenticateToken, timer.addTimer);
 router.put(TIMER_BY_ID, authenticateToken, timer.updateExistingTimer);
 router.delete(TIMER_BY_ID, authenticateToken, timer.deleteExistingTimer);
 router.put(`${TIMER_BY_ID}/:status`, authenticateToken, timer.updateTimerStatuss);
+
+router.route(IVR).post(ivr.handleMenu);
 // *************** Export ****************//
 export default router;
