@@ -3,7 +3,9 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import  config  from  "config"
+import config from "config";
+import { createServer } from "http";
+import { WebSocketServer } from "ws";
 
 // *************** Require Internal Modules ****************//
 import { connectToMongo } from "./src/lib/storage/mongo.js";  
@@ -12,7 +14,8 @@ import errorHandler from "./src/lib/errorHandler.js";
 
 // *************** Application Initialization **************//
 const app = express();
-const port = config.get("port")||3000;
+const port = config.get("port") || 3000;
+const server = createServer(app);
 
 let mongoConnected=false;
 // *************** Middleware Setup **************//
@@ -33,7 +36,9 @@ app.use("/", router);
 app.use(errorHandler);
 
 // *************** Start Server ****************//
-app.listen(port, async () => {
+const wss = new WebSocketServer({ server });
+
+server.listen(port, async () => {
     console.log(`🚀 Server running on port ${port}`);
 
     try {
@@ -44,5 +49,7 @@ app.listen(port, async () => {
         console.error("❌ MongoDB connection failed:", error.message);
     }
 });
+
+export { wss };
 
 export default app;

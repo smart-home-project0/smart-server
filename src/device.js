@@ -7,7 +7,9 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import axios from "axios";
-import config  from "config"
+import config from "config"
+import { wss } from "../server.js";
+
 // **** Import necessary dependencies ****
 import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId, updateDeviceStatus } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
@@ -70,10 +72,10 @@ async function toggle(req, res, next) {
     if (!deviceNumberId) {
       throw new AppError("No found id from tuya to this deviceId", 400);
     }
-    
+
     //פנייה לשרת של טויה
     const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceNumberId}`, { status: status });
-console.log(`response sss ${response.data.result}`);
+    console.log(`response ${response.data.result}`);
 
     if (response.data.result != true) {
       throw new AppError("Error with tuya server", 400);
@@ -86,6 +88,20 @@ console.log(`response sss ${response.data.result}`);
       res.status(200).json({ Message: `No update was needed. Device status ${device_id} has not changed.`, status: deviceStatus });
     }
     res.status(200).json({ message: `Device ${device_id} status changed successfully.`, status: deviceStatus });
+
+    // שליחת עדכון לכל הקליינטים ב-WebSocket
+    if (wss && wss.clients) {
+      const payload = JSON.stringify({
+        type: "deviceStatusChanged",
+        device_id,
+        status: deviceStatus
+      });
+      wss.clients.forEach(client => {
+        if (client.readyState === 1) { // 1 = OPEN
+          client.send(payload);
+        }
+      });
+    }
   } catch (error) {
     console.error("Error toggling device:", error);
     next(error);
@@ -103,7 +119,7 @@ async function getStatus(req, res, next) {
       throw new AppError("No found id from tuya to this deviceId", 400);
     }
     const response = await axios.get(`${tuyaServerBaseUrl}/device/status/${deviceNumberId}`);
-    
+
     if (response.data.result != true) {
       throw new AppError("Error with tuya server", 400);
     }
