@@ -9,10 +9,12 @@ import { fileURLToPath } from "url";
 import axios from "axios";
 import config from "config"
 import { wss } from "../server.js";
+import { notifyDeviceStatusChanged } from "./lib/utils/websocketNotifier.js";
 
 // **** Import necessary dependencies ****
 import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId, updateDeviceStatus } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
+import { generalToggleDevice } from "./lib/utils/deviceService.js"
 
 // **** Load JSON Schemas using Ajv ****
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -62,46 +64,35 @@ async function toggle(req, res, next) {
   const device_id = Number(req.params.device_id);
   const { status } = req.body;
   try {
-    if (!device_id) {
-      throw new AppError("Device ID is required.", 400);
-    }
-    if (typeof status !== "boolean") {
-      throw new AppError("Invalid status value. Must be boolean true or false.", 400);
-    }
-    const deviceNumberId = await findDeviceNumberId(device_id);
-    if (!deviceNumberId) {
-      throw new AppError("No found id from tuya to this deviceId", 400);
-    }
-
-    //פנייה לשרת של טויה
-    const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceNumberId}`, { status: status });
-    console.log(`response ${response.data.result}`);
-
-    if (response.data.result != true) {
-      throw new AppError("Error with tuya server", 400);
-    }
-    // עדכון הסטטוס במונגו
-    const updateStatusInMongo = await updateDeviceStatus(device_id, status);
-    const deviceStatus = status ? "ON" : "OFF";
-    //בדיקה אם הסטטוס במונגו שונה 
-    if (updateStatusInMongo === 0) {
-      res.status(200).json({ Message: `No update was needed. Device status ${device_id} has not changed.`, status: deviceStatus });
-    }
-    res.status(200).json({ message: `Device ${device_id} status changed successfully.`, status: deviceStatus });
-
-    // שליחת עדכון לכל הקליינטים ב-WebSocket
-    if (wss && wss.clients) {
-      const payload = JSON.stringify({
-        type: "deviceStatusChanged",
-        device_id,
-        status: deviceStatus
+    const result = await generalToggleDevice(device_id, status);
+    if (result.updated.state === "noChange") {
+      console.log(`No update was needed. Device status ${device_id} has not changed. status:${result.status}`);
+      return res.status(200).json({
+        message: `No update was needed. Device status ${device_id} has not changed.`,
+        status: result.status
       });
-      wss.clients.forEach(client => {
-        if (client.readyState === 1) { // 1 = OPEN
-          client.send(payload);
-        }
-      });
+
+      // // שליחת עדכון לכל הקליינטים ב-WebSocket
+      // if (wss && wss.clients) {
+      //   const payload = JSON.stringify({
+      //     type: "deviceStatusChanged",
+      //     device_id,
+      //     status: deviceStatus
+      //   });
+      //   wss.clients.forEach(client => {
+      //     if (client.readyState === 1) { // 1 = OPEN
+      //       client.send(payload);
+      //     }
+      //   });
+      // }
     }
+    console.log(`Device ${device_id} status changed successfully.`);
+    // שליחת עדכון לכל הקליינטים ב-WebSocket רק כאשר יש שינוי אמיתי
+    notifyDeviceStatusChanged(wss, device_id, result.status);
+    res.status(200).json({
+      message: `Device ${device_id} status changed successfully.`,
+      status: result.status
+    });
   } catch (error) {
     console.error("Error toggling device:", error);
     next(error);

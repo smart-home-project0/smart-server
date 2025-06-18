@@ -20,6 +20,7 @@ const server = createServer(app);
 let mongoConnected=false;
 // *************** Middleware Setup **************//
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
   origin: config.get("frontendUrl"), // קרא את כתובת ה-Frontend מהמשתנה בסביבה
@@ -51,5 +52,4 @@ server.listen(port, async () => {
 });
 
 export { wss };
-
 export default app;
