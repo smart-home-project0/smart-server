@@ -7,10 +7,14 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import axios from "axios";
-import config  from "config"
+import config from "config"
+import { wss } from "../server.js";
+import { notifyDeviceStatusChanged } from "./lib/utils/websocketNotifier.js";
+
 // **** Import necessary dependencies ****
-import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId, updateDeviceStatus } from "./lib/storage/mongo.js";
+import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
+import { generalToggleDevice } from "./lib/utils/deviceService.js"
 
 // **** Load JSON Schemas using Ajv ****
 const ajv = new Ajv({ strict: false, allErrors: true });
@@ -59,33 +63,25 @@ const tuyaServerBaseUrl = config.get("tuya.serverBaseUrl");
 async function toggle(req, res, next) {
   const device_id = Number(req.params.device_id);
   const { status } = req.body;
-  try {
-    if (!device_id) {
-      throw new AppError("Device ID is required.", 400);
-    }
-    if (typeof status !== "boolean") {
-      throw new AppError("Invalid status value. Must be boolean true or false.", 400);
-    }
-    const deviceNumberId = await findDeviceNumberId(device_id);
-    if (!deviceNumberId) {
-      throw new AppError("No found id from tuya to this deviceId", 400);
-    }
-    
-    //פנייה לשרת של טויה
-    const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceNumberId}`, { status: status });
-console.log(`response sss ${response.data.result}`);
+  // זיהוי מקור הבקשה לפי header
+  let source = "client";
+  if (req.headers['x-internal-key'] && req.headers['x-internal-key'] === config.get("timerServerKey")) {
+    source = "timer";
+  }
 
-    if (response.data.result != true) {
-      throw new AppError("Error with tuya server", 400);
+  try {
+    const result = await generalToggleDevice(device_id, status, source);
+    if (result.updated.state === "noChange") {
+      console.log(`No update was needed. Device status ${device_id} has not changed. status:${result.status}`);
+    } else {
+      console.log(`Device ${device_id} status changed successfully.`);
     }
-    // עדכון הסטטוס במונגו
-    const updateStatusInMongo = await updateDeviceStatus(device_id, status);
-    const deviceStatus = status ? "ON" : "OFF";
-    //בדיקה אם הסטטוס במונגו שונה 
-    if (updateStatusInMongo === 0) {
-      res.status(200).json({ Message: `No update was needed. Device status ${device_id} has not changed.`, status: deviceStatus });
-    }
-    res.status(200).json({ message: `Device ${device_id} status changed successfully.`, status: deviceStatus });
+    // שליחת עדכון לכל הקליינטים ב-WebSocket רק כאשר יש שינוי אמיתי
+    notifyDeviceStatusChanged(wss, device_id, result.status);
+    res.status(200).json({
+      message: `Device ${device_id} status changed successfully.`,
+      status: result.status
+    });
   } catch (error) {
     console.error("Error toggling device:", error);
     next(error);
@@ -103,7 +99,7 @@ async function getStatus(req, res, next) {
       throw new AppError("No found id from tuya to this deviceId", 400);
     }
     const response = await axios.get(`${tuyaServerBaseUrl}/device/status/${deviceNumberId}`);
-    
+
     if (response.data.result != true) {
       throw new AppError("Error with tuya server", 400);
     }

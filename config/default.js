@@ -5,6 +5,7 @@ dotenv.config();
 export default {
   port: process.env.PORT || 3000,
   frontendUrl: process.env.FRONTEND_URL,
+  timerServerKey: process.env.TIMER_SERVER_KEY,
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
     accessSecretKey: process.env.ACCESS_TOKEN_SECRET,
