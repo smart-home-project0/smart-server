@@ -52,13 +52,11 @@ const id = Number(deviceId);
     next(error);
   }
 }
-
 function calculateOneTimeExecution(time) {
   const [hour, minute] = time.split(':').map(Number);
-  let now = DateTime.now().toUTC();
+  let now = DateTime.now().setZone('Asia/Jerusalem'); 
   let target = now.set({ hour, minute, second: 0, millisecond: 0 });
 
-  // אם השעה כבר עברה, קובעים למחר
   if (target <= now) {
     target = target.plus({ days: 1 });
   }
@@ -67,14 +65,14 @@ function calculateOneTimeExecution(time) {
     throw new AppError(`Invalid time for one-time execution: ${time}`, 400);
   }
 
-  return target.toJSDate();
+  return target.toUTC().toJSDate(); //  החזר ב־UTC
 }
+
 function calculateNextExecution(daysOfWeek, time) {
   const [hour, minute] = time.split(':').map(Number);
-  const now = DateTime.now().toUTC();
+  const now = DateTime.now().setZone('Asia/Jerusalem'); 
 
-  // weekdayLuxon: 1=שני, ..., 7=ראשון
-  const todayWeekday = now.weekday % 7; // נורמל ל-0=ראשון, ..., 6=שבת
+  const todayWeekday = now.weekday % 7;
 
   for (let offset = 0; offset < 7; offset++) {
     const targetDayIndex = (todayWeekday + offset) % 7;
@@ -87,15 +85,15 @@ function calculateNextExecution(daysOfWeek, time) {
         millisecond: 0,
       });
 
-      // אם זה היום והשעה כבר עברה – דלג ליום הבא
       if (offset === 0 && candidate <= now) continue;
 
-      return candidate.toJSDate();
+      return candidate.toUTC().toJSDate(); //  החזר ב־UTC
     }
   }
 
   throw new AppError(`No valid day found in daysOfWeek: ${daysOfWeek}`, 400);
 }
+
 
  async function addTimer(req, res, next) {
   try {
