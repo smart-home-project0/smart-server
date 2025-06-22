@@ -7,7 +7,7 @@ import { wss } from "../../../server.js";
 
 const tuyaServerBaseUrl = config.get("tuya.serverBaseUrl");
 
-async function generalToggleDevice(device_id, status) {
+async function generalToggleDevice(device_id, status, source = "unknown") {
     if (!device_id) {
         throw new AppError("Device ID is required.", 400);
     }
@@ -20,7 +20,8 @@ async function generalToggleDevice(device_id, status) {
         throw new AppError("No found id from tuya to this deviceId", 400);
     }
 
-    const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceNumberId}`, { status });
+    console.log(`Device toggle requested from: ${source}`);
+    const response = await axios.put(`${tuyaServerBaseUrl}/device/toggle/${deviceNumberId}`, { status, source });
     if (response.data.result !== true) {
         throw new AppError("Error with tuya server", 400);
     }

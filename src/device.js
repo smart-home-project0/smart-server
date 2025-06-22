@@ -12,7 +12,7 @@ import { wss } from "../server.js";
 import { notifyDeviceStatusChanged } from "./lib/utils/websocketNotifier.js";
 
 // **** Import necessary dependencies ****
-import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId, updateDeviceStatus } from "./lib/storage/mongo.js";
+import { findDevicesAndFamilyNameByfamily_id, findDeviceNumberId } from "./lib/storage/mongo.js";
 import AppError from "./lib/appError.js";
 import { generalToggleDevice } from "./lib/utils/deviceService.js"
 
@@ -63,30 +63,19 @@ const tuyaServerBaseUrl = config.get("tuya.serverBaseUrl");
 async function toggle(req, res, next) {
   const device_id = Number(req.params.device_id);
   const { status } = req.body;
+  // זיהוי מקור הבקשה לפי header
+  let source = "client";
+  if (req.headers['x-internal-key'] && req.headers['x-internal-key'] === config.get("timerServerKey")) {
+    source = "timer";
+  }
+
   try {
-    const result = await generalToggleDevice(device_id, status);
+    const result = await generalToggleDevice(device_id, status, source);
     if (result.updated.state === "noChange") {
       console.log(`No update was needed. Device status ${device_id} has not changed. status:${result.status}`);
-      return res.status(200).json({
-        message: `No update was needed. Device status ${device_id} has not changed.`,
-        status: result.status
-      });
-
-      // // שליחת עדכון לכל הקליינטים ב-WebSocket
-      // if (wss && wss.clients) {
-      //   const payload = JSON.stringify({
-      //     type: "deviceStatusChanged",
-      //     device_id,
-      //     status: deviceStatus
-      //   });
-      //   wss.clients.forEach(client => {
-      //     if (client.readyState === 1) { // 1 = OPEN
-      //       client.send(payload);
-      //     }
-      //   });
-      // }
+    } else {
+      console.log(`Device ${device_id} status changed successfully.`);
     }
-    console.log(`Device ${device_id} status changed successfully.`);
     // שליחת עדכון לכל הקליינטים ב-WebSocket רק כאשר יש שינוי אמיתי
     notifyDeviceStatusChanged(wss, device_id, result.status);
     res.status(200).json({

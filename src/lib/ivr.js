@@ -12,7 +12,7 @@ async function handleIVR(req, res) {
     switch (ApiExtension) {
         case '3/1': {
         try {
-                const result = await generalToggleDevice(device_id, true);
+                const result = await generalToggleDevice(device_id, true, "ivr");
                 console.log(`result from IVR 1 ${result}`);
                 if (result.updated.success) {
                     return res.send("הפעולה בוצעה בהצלחה. המכשיר נדלק. תודה שהתקשרת.");
@@ -27,7 +27,7 @@ async function handleIVR(req, res) {
         }
         case '3/2': {
           try {
-                const result = await generalToggleDevice(device_id, false);
+                const result = await generalToggleDevice(device_id, false, "ivr");
                 console.log(`result from IVR 2 ${result}`);
                 if (result.updated.success) {
                     return res.send("הפעולה בוצעה בהצלחה. המכשיר נכבה. תודה שהתקשרת.");

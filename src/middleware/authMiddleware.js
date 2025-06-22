@@ -19,4 +19,13 @@ function authenticateToken(req, res, next) {
   });
 };
 
-export default authenticateToken;
+const authenticateInternalServer = (req, res, next) => {
+  console.log("Authenticating internal server request");
+  const serverKey = req.headers['x-internal-key'];
+  if (serverKey !== config.get("timerServerKey")) {
+    return res.status(403).json({ error: 'Unauthorized server' });
+  }
+  next();
+};
+
+export { authenticateToken, authenticateInternalServer};

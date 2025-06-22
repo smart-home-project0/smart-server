@@ -156,28 +156,26 @@ async function findDeviceNumberId(device_id) {
 // פונקציה לעדכון סטטוס המכשיר
 async function updateDeviceStatus(device_id, status) {
   const deviceCollection = dbHandle.collection(DEVICES_COLLECTION);
-  const mongoStatus = status ? "ON" : "OFF";
+  const statusToMongo = status ? "ON" : "OFF";
   // עדכון סטטוס המכשיר בתוך משפחת המשתמש
   const device = await deviceCollection.findOne({ _id: device_id });
   if (!device) {
     throw new AppError(`Device with ID ${device_id} not found.`, 400);
   }
+console.log("device.status:", device.status, "mongoStatus:", statusToMongo);
   // אם הסטטוס כבר תואם, אין צורך בעדכון
-  if (device.status === mongoStatus) {
-    console.log(`Device ${device_id} already has status ${mongoStatus}. No update needed.`);
+  if (device.status === statusToMongo) {
+    console.log(`Device ${device_id} already has status ${statusToMongo}. No update needed.`);
     return { success: true, state: "noChange" };
   }
   // עדכון סטטוס המכשיר
+  console.log("Updating device:", device_id, "to status:", statusToMongo);
   const result = await deviceCollection.updateOne(
     { _id: device_id },
-    { $set: { status: mongoStatus } }
+    { $set: { status: statusToMongo } }
   );
-  if (result.modifiedCount === 0) {
-    console.log(`result.modifiedCount: ${result.modifiedCount}`);
-    throw new AppError(`Device with ID ${device_id} not found or status not updated.`, 400);
-  }
-  console.log(`answerd from mongo: Device ${device_id} status updated to ${mongoStatus}.`);
-  console.log(result);
+  console.log("updateOne result:", result);
+  console.log(`answerd from mongo: Device ${device_id} status updated to ${statusToMongo}.`);
   return { success: true, state: "change" };
 }
 

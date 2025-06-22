@@ -6,7 +6,7 @@ import * as device from '../device.js';  // Note: device.js is updated to use ES
 import * as timer from '../timer.js'
 import * as ivr from './ivr.js';
 import AppError from './appError.js';
-import authenticateToken from "../middleware/authMiddleware.js";
+import {authenticateToken, authenticateInternalServer} from "../middleware/authMiddleware.js";
 import verifyGoogleToken from "../middleware/googleAuth.js";
 
 // *************** Constants ****************//
@@ -25,6 +25,7 @@ const LOGOUT = "/logout";
 const TIMERS = "/timers";
 const TIMER_BY_ID = "/timers/:timerId";
 const IVR= "/ivr";
+
 const router = express.Router();
 
 // *************** Internal Functions ****************//
@@ -67,6 +68,7 @@ router.route(LOGOUT).post(authenticateToken, user.logoutUser);
 router.route(DEVICE_LIST_AND_FAMILY_NAME).get(authenticateToken, device.getDeviceListAndFamilyNameByfamily_id);
 router.route(GET_STATUS_DEVICE).get(authenticateToken, device.getStatus);
 router.route(TOGGLE_DEVICE).put(authenticateToken, device.toggle);
+router.route(`/cron${TOGGLE_DEVICE}`).put(authenticateInternalServer, device.toggle);
 
 router.get(`${TIMERS}/:deviceId`, authenticateToken, timer.getTimersByDeviceId);
 router.post(TIMERS, authenticateToken, timer.addTimer);

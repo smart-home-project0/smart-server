@@ -39,6 +39,28 @@ app.use(errorHandler);
 // *************** Start Server ****************//
 const wss = new WebSocketServer({ server });
 
+// PING/PONG mechanism to detect dead clients
+wss.on('connection', function connection(ws) {
+  ws.isAlive = true;
+
+  ws.on('pong', function () {
+    ws.isAlive = true;
+  });
+});
+
+setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) {
+      console.log('[WebSocket] Client did not respond to ping, terminating connection.');
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    if (ws.readyState === ws.OPEN) {
+      ws.ping();
+    }
+  });
+}, 30000);
+
 server.listen(port, async () => {
     console.log(`🚀 Server running on port ${port}`);
 
