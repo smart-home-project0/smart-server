@@ -55,7 +55,7 @@ const id = Number(deviceId);
 
 function calculateOneTimeExecution(time) {
   const [hour, minute] = time.split(':').map(Number);
-  let now = DateTime.now();
+  let now = DateTime.now().toUTC();
   let target = now.set({ hour, minute, second: 0, millisecond: 0 });
 
   // אם השעה כבר עברה, קובעים למחר
@@ -71,7 +71,7 @@ function calculateOneTimeExecution(time) {
 }
 function calculateNextExecution(daysOfWeek, time) {
   const [hour, minute] = time.split(':').map(Number);
-  const now = DateTime.now();
+  const now = DateTime.now().toUTC();
 
   // weekdayLuxon: 1=שני, ..., 7=ראשון
   const todayWeekday = now.weekday % 7; // נורמל ל-0=ראשון, ..., 6=שבת
