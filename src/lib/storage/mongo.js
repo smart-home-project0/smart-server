@@ -192,7 +192,9 @@ async function getNextTimerId() {
   if (!updatedDoc || !updatedDoc.seq) throw new Error("Failed to get or create counter document.");
   return updatedDoc.seq;
 }
-
+async function timerExists({ deviceId, time, daysOfWeek }) {
+  return await dbHandle.collection(TIMERS_COLLECTION).findOne({ deviceId, time, daysOfWeek });
+}
 async function createTimer(timerData) {
   const now = new Date();
   timerData.createdAt = now;
@@ -249,6 +251,7 @@ export {
   findSessionByToken,
   deleteSessionByToken,
   deleteAllUserSessions,
+  timerExists,
   createTimer,
   findTimersByDeviceId,
   updateTimer,
