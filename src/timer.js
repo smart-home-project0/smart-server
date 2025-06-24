@@ -157,6 +157,15 @@ const existingTimer = await timerExists({
     if (!isValid) {
       throw new AppError("Invalid timer update data", 400, errors); }
 
+    // חישוב nextExecution מחדש
+    let nextExecution;
+    if (timerData.daysOfWeek === '0000000') {
+      nextExecution = calculateOneTimeExecution(timerData.time);
+    } else {
+      nextExecution = calculateNextExecution(timerData.daysOfWeek, timerData.time);
+    }
+    timerData.nextExecution = nextExecution;
+
     const updated = await updateTimer(timerId, timerData);
     if (!updated) {
       throw new AppError("Timer not found.", 404);
