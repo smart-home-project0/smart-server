@@ -29,6 +29,7 @@ const validateSchema = (schemaId, data) => {
 
 // *************** Import DB functions ****************//
 import {
+  timerExists,  
   createTimer,
   deleteTimer,
   findTimersByDeviceId,
@@ -67,33 +68,38 @@ function calculateOneTimeExecution(time) {
 
   return target.toUTC().toJSDate(); //  החזר ב־UTC
 }
-
 function calculateNextExecution(daysOfWeek, time) {
   const [hour, minute] = time.split(':').map(Number);
-  const now = DateTime.now().setZone('Asia/Jerusalem'); 
+  const now = DateTime.now().setZone('Asia/Jerusalem');
 
-  const todayWeekday = now.weekday % 7;
+  const todayWeekday = now.weekday === 7 ? 0 : now.weekday;
 
   for (let offset = 0; offset < 7; offset++) {
     const targetDayIndex = (todayWeekday + offset) % 7;
 
     if (daysOfWeek[targetDayIndex] === '1') {
-      const candidate = now.plus({ days: offset }).set({
+      let candidate = now.plus({ days: offset }).set({
         hour,
         minute,
         second: 0,
         millisecond: 0,
       });
 
-      if (offset === 0 && candidate <= now) continue;
+      // אם זה היום והשעה כבר עברה – קפוץ לשבוע הבא
+      if (offset === 0 && candidate <= now) {
+        candidate = candidate.plus({ days: 7 });
+      }
 
-      return candidate.toUTC().toJSDate(); //  החזר ב־UTC
+      if (!candidate.isValid) {
+        throw new AppError(`Invalid candidate time generated: ${candidate}`, 400);
+      }
+
+      return candidate.toUTC().toJSDate();
     }
   }
 
   throw new AppError(`No valid day found in daysOfWeek: ${daysOfWeek}`, 400);
 }
-
 
  async function addTimer(req, res, next) {
   try {
@@ -110,6 +116,14 @@ function calculateNextExecution(daysOfWeek, time) {
       throw new AppError("Missing 'time' field", 400);
     }
 
+const existingTimer = await timerExists({
+  deviceId: timerData.deviceId,
+  time: timerData.time,
+  daysOfWeek: timerData.daysOfWeek
+});
+    if (existingTimer) {
+      throw new AppError("Timer already exists for this time and device.", 409);
+    }
     let nextExecution;
     if (timerData.daysOfWeek === '0000000') {
       console.log("Calculating one-time execution for:", timerData.time);
@@ -142,6 +156,15 @@ function calculateNextExecution(daysOfWeek, time) {
     const { isValid, errors } = validateSchema("updateTimerSchema", timerData);
     if (!isValid) {
       throw new AppError("Invalid timer update data", 400, errors); }
+
+    // חישוב nextExecution מחדש
+    let nextExecution;
+    if (timerData.daysOfWeek === '0000000') {
+      nextExecution = calculateOneTimeExecution(timerData.time);
+    } else {
+      nextExecution = calculateNextExecution(timerData.daysOfWeek, timerData.time);
+    }
+    timerData.nextExecution = nextExecution;
 
     const updated = await updateTimer(timerId, timerData);
     if (!updated) {

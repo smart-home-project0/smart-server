@@ -852,3 +852,27 @@
 {"level":"error","message":"[ERROR] Token is invalid."}
 {"level":"error","message":"[ERROR] Token is invalid."}
 {"level":"error","message":"[ERROR] Token is invalid."}
+{"level":"error","message":"[ERROR] dbHandle is not defined"}
+{"level":"error","message":"[ERROR] dbHandle is not defined"}
+{"level":"error","message":"[ERROR] timerExists is not defined"}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0100000"}
+{"level":"error","message":"[ERROR] Token is invalid."}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0100000"}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] No valid day found in daysOfWeek: 0100000"}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] User with this email already exists"}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}
+{"level":"error","message":"[ERROR] Timer already exists for this time and device."}

@@ -30,6 +30,11 @@ app.use(cors({
 app.use(morgan("dev"));
 
 app.use(cookieParser());
+
+app.get('/health', (req, res) => {
+  console.log("health endpoint was called");
+  res.status(200).json({ status: 'OK' });
+});
 // Use the router which now contains all endpoints
 app.use("/", router);
 
